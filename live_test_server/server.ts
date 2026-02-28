@@ -17,16 +17,10 @@ interface AnalyzeRequest {
   whitelist?: string[];
 }
 
-// Warmup: Sunucu ayağa kalkarken tüm yaygın konfigürasyonları önceden oluştur
+// Instance cache: lazily populated, keyed by options fingerprint.
+// Detector-level static pattern cache (per-language) ensures regex objects
+// are compiled only once and shared across all instances of the same language.
 const terlikCache = new Map<string, Terlik>();
-
-const WARMUP_CONFIGS: Array<{ mode: Mode; maskStyle: MaskStyle; enableFuzzy: boolean }> = [
-  { mode: "strict", maskStyle: "stars", enableFuzzy: false },
-  { mode: "balanced", maskStyle: "stars", enableFuzzy: false },
-  { mode: "balanced", maskStyle: "partial", enableFuzzy: false },
-  { mode: "balanced", maskStyle: "replace", enableFuzzy: false },
-  { mode: "loose", maskStyle: "stars", enableFuzzy: true },
-];
 
 function buildCacheKey(language: string, mode: string, maskStyle: string, enableFuzzy: boolean, fuzzyThreshold: number, fuzzyAlgorithm: string, replaceMask: string, customWords?: string[], whitelist?: string[]): string {
   const cw = (customWords ?? []).sort().join(",");
@@ -34,48 +28,14 @@ function buildCacheKey(language: string, mode: string, maskStyle: string, enable
   return `${language}|${mode}|${maskStyle}|${enableFuzzy}|${fuzzyThreshold}|${fuzzyAlgorithm}|${replaceMask}|${cw}|${wl}`;
 }
 
-// Warmup sample texts to trigger V8 JIT compilation on regex patterns
-const WARMUP_TEXTS = [
-  "merhaba dünya nasılsın",
-  "siktir git burdan",
-  "s.i.k.t.i.r lan",
-  "$1kt1r",
-  "amsterdam sikke bokser malzeme",
-];
-
 const SUPPORTED_LANGUAGES = getSupportedLanguages();
+let warmupDuration = 0;
+let warmupDone = false;
 
 console.log("");
 console.log("  terlik.js — Sunucu başlatılıyor...");
 console.log("");
-console.log(`  [1/3] Warmup: ${SUPPORTED_LANGUAGES.length} dil × ${WARMUP_CONFIGS.length} config = ${SUPPORTED_LANGUAGES.length * WARMUP_CONFIGS.length} instance`);
-
-const warmupStart = performance.now();
-for (const lang of SUPPORTED_LANGUAGES) {
-  const langStart = performance.now();
-  for (const cfg of WARMUP_CONFIGS) {
-    const key = buildCacheKey(lang, cfg.mode, cfg.maskStyle, cfg.enableFuzzy, 0.8, "levenshtein", "[***]");
-    const instance = new Terlik({
-      language: lang,
-      mode: cfg.mode,
-      maskStyle: cfg.maskStyle,
-      enableFuzzy: cfg.enableFuzzy,
-      fuzzyThreshold: 0.8,
-      fuzzyAlgorithm: "levenshtein",
-      replaceMask: "[***]",
-    });
-    terlikCache.set(key, instance);
-
-    // JIT warmup: run actual detection so V8 compiles the regex patterns
-    for (const text of WARMUP_TEXTS) {
-      instance.containsProfanity(text);
-    }
-  }
-  const langDuration = performance.now() - langStart;
-  console.log(`         ${lang}: ${WARMUP_CONFIGS.length} config + JIT warmup  (${langDuration.toFixed(0)}ms)`);
-}
-const warmupDuration = performance.now() - warmupStart;
-console.log(`         Toplam warmup: ${warmupDuration.toFixed(0)}ms`);
+console.log(`  [1/3] Warmup: ${SUPPORTED_LANGUAGES.length} dil (arka planda)`);
 
 // ────────────────────────────────────────────
 // In-memory dictionary store for editor
@@ -2500,8 +2460,6 @@ const server = http.createServer((req, res) => {
   res.end("Not found");
 });
 
-const totalStartupDuration = performance.now() - warmupStart;
-
 console.log("");
 console.log(`  [3/3] HTTP sunucusu başlatılıyor (port ${PORT})...`);
 
@@ -2514,10 +2472,37 @@ server.listen(PORT, () => {
   console.log(`  │   http://localhost:${PORT}                      │`);
   console.log("  │                                              │");
   console.log("  │   Kaynak: src/ (build gereksiz)              │");
-  console.log(`  │   Warmup: ${warmupDuration.toFixed(0).padStart(5)}ms (${SUPPORTED_LANGUAGES.length} dil × ${WARMUP_CONFIGS.length} cfg)     │`);
-  console.log(`  │   Startup: ${totalStartupDuration.toFixed(0).padStart(4)}ms toplam                    │`);
+  console.log("  │   Warmup: arka planda (ilk istekte hazır)    │");
   console.log("  │   Çıkmak için: Ctrl+C                       │");
   console.log("  │                                              │");
   console.log("  └──────────────────────────────────────────────┘");
   console.log("");
+
+  // Background warmup: compile patterns + JIT warm for each language.
+  // Server is already accepting requests — first request to an un-warmed
+  // language will trigger synchronous compilation (~15s for first language).
+  const warmupStart = performance.now();
+  let warmedCount = 0;
+  const warmupNext = () => {
+    if (warmedCount >= SUPPORTED_LANGUAGES.length) {
+      warmupDuration = performance.now() - warmupStart;
+      warmupDone = true;
+      console.log(`  ✔ Warmup tamamlandı: ${SUPPORTED_LANGUAGES.length} dil, ${warmupDuration.toFixed(0)}ms`);
+      return;
+    }
+    const lang = SUPPORTED_LANGUAGES[warmedCount];
+    const langStart = performance.now();
+    const instance = new Terlik({ language: lang });
+    // Trigger pattern compilation + V8 JIT
+    instance.containsProfanity("warmup");
+    instance.containsProfanity("s.i.k.t.i.r");
+    instance.containsProfanity("$1kt1r amsterdam sikke");
+    const key = buildCacheKey(lang, "balanced", "stars", false, 0.8, "levenshtein", "[***]");
+    terlikCache.set(key, instance);
+    console.log(`    warmup ${lang}: ${(performance.now() - langStart).toFixed(0)}ms`);
+    warmedCount++;
+    // Yield to event loop between languages so requests aren't blocked
+    setTimeout(warmupNext, 0);
+  };
+  setTimeout(warmupNext, 0);
 });

@@ -6,3 +6,4 @@ coverage/
 .plans/
 benchmarks/accuracy-results.json
 .devlogs
+.claude

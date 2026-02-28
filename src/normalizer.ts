@@ -27,10 +27,10 @@ function buildNumberExpander(
     expansions
       .map(([num]) => {
         const escaped = num.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-        return `(?<=\\p{L})${escaped}(?=\\p{L})`;
+        return `(?<=[a-zA-ZÀ-ɏ])${escaped}(?=[a-zA-ZÀ-ɏ])`;
       })
       .join("|"),
-    "gu",
+    "g",
   );
   const lookup: Record<string, string> = Object.fromEntries(expansions);
 
@@ -39,7 +39,7 @@ function buildNumberExpander(
 }
 
 function removePunctuation(text: string): string {
-  return text.replace(/(?<=\p{L})[.\-_*,;:!?]+(?=\p{L})/gu, "");
+  return text.replace(/(?<=[a-zA-ZÀ-ɏ])[.\-_*,;:!?]+(?=[a-zA-ZÀ-ɏ])/g, "");
 }
 
 function collapseRepeats(text: string): string {

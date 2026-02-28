@@ -4,8 +4,12 @@ import { compilePatterns, REGEX_TIMEOUT_MS } from "./patterns.js";
 import { getFuzzyMatcher } from "./fuzzy.js";
 
 export class Detector {
+  /** Static cache: shares compiled patterns across instances with identical dictionaries. */
+  private static patternCache = new Map<string, CompiledPattern[]>();
+
   private dictionary: Dictionary;
   private _patterns: CompiledPattern[] | null = null;
+  private cacheKey: string | null;
   private normalizedWordSet: Set<string>;
   private normalizedWordToRoot: Map<string, string>;
   private normalizeFn: (text: string) => string;
@@ -17,11 +21,13 @@ export class Detector {
     normalizeFn: (text: string) => string,
     locale: string,
     charClasses: Record<string, string>,
+    cacheKey?: string | null,
   ) {
     this.dictionary = dictionary;
     this.normalizeFn = normalizeFn;
     this.locale = locale;
     this.charClasses = charClasses;
+    this.cacheKey = cacheKey ?? null;
     this.normalizedWordSet = new Set<string>();
     this.normalizedWordToRoot = new Map<string, string>();
     this.buildNormalizedLookup();
@@ -29,12 +35,22 @@ export class Detector {
 
   private ensureCompiled(): CompiledPattern[] {
     if (this._patterns === null) {
+      if (this.cacheKey) {
+        const cached = Detector.patternCache.get(this.cacheKey);
+        if (cached) {
+          this._patterns = cached;
+          return this._patterns;
+        }
+      }
       this._patterns = compilePatterns(
         this.dictionary.getEntries(),
         this.dictionary.getSuffixes(),
         this.charClasses,
         this.normalizeFn,
       );
+      if (this.cacheKey) {
+        Detector.patternCache.set(this.cacheKey, this._patterns);
+      }
     }
     return this._patterns;
   }
@@ -44,6 +60,7 @@ export class Detector {
   }
 
   recompile(): void {
+    this.cacheKey = null;
     this._patterns = compilePatterns(
       this.dictionary.getEntries(),
       this.dictionary.getSuffixes(),
@@ -304,8 +321,8 @@ export class Detector {
     let start = index;
     let end = index + length;
 
-    while (start > 0 && /\p{L}/u.test(text[start - 1])) start--;
-    while (end < text.length && /\p{L}/u.test(text[end])) end++;
+    while (start > 0 && /[a-zA-ZÀ-ɏ]/.test(text[start - 1])) start--;
+    while (end < text.length && /[a-zA-ZÀ-ɏ]/.test(text[end])) end++;
 
     return text.slice(start, end);
   }

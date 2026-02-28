@@ -76,11 +76,13 @@ export class Terlik {
       options?.customList,
       options?.whitelist,
     );
+    const hasCustomDict = !!(options?.customList?.length || options?.whitelist?.length);
     this.detector = new Detector(
       this.dictionary,
       normalizeFn,
       langConfig.locale,
       langConfig.charClasses,
+      hasCustomDict ? null : this.language,
     );
 
     if (options?.backgroundWarmup) {

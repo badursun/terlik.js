@@ -1,8 +1,13 @@
 import type { CompiledPattern, WordEntry } from "./types.js";
 
-// \W is NOT Unicode-aware — ı, ş, ğ etc. count as \W in JS.
-// Use negated Unicode letter/number class instead to avoid eating Turkish chars.
-const SEPARATOR = "[^\\p{L}\\p{N}]{0,3}";
+// Explicit Latin + Turkish + European letter/digit range (À = U+00C0, ɏ = U+024F).
+// Avoids \p{L}/\p{N} Unicode property escapes which cause V8 to build
+// full Unicode category tables, resulting in ~67x slower JIT compilation.
+// İ (U+0130) and ı (U+0131) are within the À-ɏ range.
+const WORD_CHAR = "a-zA-Z0-9À-ɏ";
+const SEPARATOR = `[^${WORD_CHAR}]{0,3}`;
+const WORD_BOUNDARY_BEHIND = `(?<![${WORD_CHAR}])`;
+const WORD_BOUNDARY_AHEAD = `(?![${WORD_CHAR}])`;
 
 const MAX_PATTERN_LENGTH = 10000;
 const MAX_SUFFIX_CHAIN = 2;
@@ -93,19 +98,19 @@ export function compilePatterns(
     let pattern: string;
     if (useSuffix) {
       // Suffix-aware: root + optional suffix chain (up to MAX_SUFFIX_CHAIN), then word boundary
-      pattern = `(?<![\\p{L}\\p{N}])(?:${combined})${suffixGroup}{0,${MAX_SUFFIX_CHAIN}}(?![\\p{L}\\p{N}])`;
+      pattern = `${WORD_BOUNDARY_BEHIND}(?:${combined})${suffixGroup}{0,${MAX_SUFFIX_CHAIN}}${WORD_BOUNDARY_AHEAD}`;
     } else {
       // Original: strict word boundary on both sides
-      pattern = `(?<![\\p{L}\\p{N}])(?:${combined})(?![\\p{L}\\p{N}])`;
+      pattern = `${WORD_BOUNDARY_BEHIND}(?:${combined})${WORD_BOUNDARY_AHEAD}`;
     }
 
     // Safety guard: if pattern is too long, fallback to non-suffix version
     if (pattern.length > MAX_PATTERN_LENGTH && useSuffix) {
-      pattern = `(?<![\\p{L}\\p{N}])(?:${combined})(?![\\p{L}\\p{N}])`;
+      pattern = `${WORD_BOUNDARY_BEHIND}(?:${combined})${WORD_BOUNDARY_AHEAD}`;
     }
 
     try {
-      const regex = new RegExp(pattern, "giu");
+      const regex = new RegExp(pattern, "gi");
       patterns.push({
         root: entry.root,
         severity: entry.severity,
@@ -116,8 +121,8 @@ export function compilePatterns(
       // Fallback: try without suffix if suffix caused the error
       if (useSuffix) {
         try {
-          const fallbackPattern = `(?<![\\p{L}\\p{N}])(?:${combined})(?![\\p{L}\\p{N}])`;
-          const regex = new RegExp(fallbackPattern, "giu");
+          const fallbackPattern = `${WORD_BOUNDARY_BEHIND}(?:${combined})${WORD_BOUNDARY_AHEAD}`;
+          const regex = new RegExp(fallbackPattern, "gi");
           patterns.push({
             root: entry.root,
             severity: entry.severity,
