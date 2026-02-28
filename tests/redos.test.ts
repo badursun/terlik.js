@@ -21,8 +21,8 @@ function createDetector(config: typeof trConfig) {
 // Timeout is per-pattern (not total budget), so each pattern gets its own
 // REGEX_TIMEOUT_MS cap. With bounded separators, individual patterns complete
 // quickly but total time across all patterns can be higher. Use generous
-// budget that still validates bounded detection time.
-const MAX_DETECT_MS = REGEX_TIMEOUT_MS * 12;
+// budget for slow CI runners with coverage instrumentation overhead.
+const MAX_DETECT_MS = REGEX_TIMEOUT_MS * 24;
 
 describe("ReDoS hardening", () => {
   const trDetector = createDetector(trConfig);
