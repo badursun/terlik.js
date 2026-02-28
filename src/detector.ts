@@ -1,6 +1,6 @@
 import type { CompiledPattern, DetectOptions, MatchResult, Mode } from "./types.js";
 import { Dictionary } from "./dictionary/index.js";
-import { compilePatterns } from "./patterns.js";
+import { compilePatterns, REGEX_TIMEOUT_MS } from "./patterns.js";
 import { getFuzzyMatcher } from "./fuzzy.js";
 
 export class Detector {
@@ -148,12 +148,17 @@ export class Detector {
     isNormalized: boolean,
   ): void {
     const existingIndices = new Set(results.map((r) => r.index));
+    const startTime = Date.now();
 
     for (const pattern of this.patterns) {
+      if (Date.now() - startTime > REGEX_TIMEOUT_MS) break;
+
       pattern.regex.lastIndex = 0;
       let match: RegExpExecArray | null;
 
       while ((match = pattern.regex.exec(searchText)) !== null) {
+        if (Date.now() - startTime > REGEX_TIMEOUT_MS) break;
+
         const matchedText = match[0];
         const matchIndex = match.index;
 
@@ -242,9 +247,12 @@ export class Detector {
     const origWords = text.split(/\s+/);
     const matcher = getFuzzyMatcher(algorithm);
     const existingIndices = new Set(existingResults.map((r) => r.index));
+    const startTime = Date.now();
 
     let charIndex = 0;
     for (let wi = 0; wi < origWords.length; wi++) {
+      if (Date.now() - startTime > REGEX_TIMEOUT_MS) break;
+
       const origWord = origWords[wi];
       const word = wi < normWords.length ? normWords[wi] : "";
 

@@ -2,10 +2,13 @@ import type { CompiledPattern, WordEntry } from "./types.js";
 
 // \W is NOT Unicode-aware — ı, ş, ğ etc. count as \W in JS.
 // Use negated Unicode letter/number class instead to avoid eating Turkish chars.
-const SEPARATOR = "[^\\p{L}\\p{N}]*";
+const SEPARATOR = "[^\\p{L}\\p{N}]{0,3}";
 
-const MAX_PATTERN_LENGTH = 5000;
+const MAX_PATTERN_LENGTH = 6000;
 const MAX_SUFFIX_CHAIN = 2;
+
+/** Safety timeout (ms) for regex execution in detection loops. */
+export const REGEX_TIMEOUT_MS = 250;
 
 function charToPattern(ch: string, charClasses: Record<string, string>): string {
   const cls = charClasses[ch.toLowerCase()];

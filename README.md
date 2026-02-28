@@ -322,7 +322,7 @@ deNormalize("Scheiße"); // "scheisse"
 
 ## Testing
 
-548 tests covering all 4 languages, 25 Turkish root words, suffix detection, multi-language isolation, normalization, fuzzy matching, cleaning, integration, and edge cases:
+619 tests covering all 4 languages, 25 Turkish root words, suffix detection, multi-language isolation, normalization, fuzzy matching, cleaning, integration, ReDoS hardening, attack surface coverage, and edge cases:
 
 ```bash
 pnpm test          # run once
@@ -360,6 +360,26 @@ Pre-commit hooks (via Husky) automatically run type checking on staged `.ts` fil
 See [CONTRIBUTING.md](./CONTRIBUTING.md) for contribution guidelines.
 
 ## Changelog
+
+### 2026-02-28 (v2.1) — ReDoS Security Hardening
+
+**Added Regex Denial-of-Service protection.**
+
+Identified vulnerability: overlap between `charClasses` and `separator` (`@`, `$`, `!`, `|`, `+`, `#`, `€`, `¢`, `©` could be matched by both char class and separator) enabled polynomial O(n^2) backtracking via adversarial input.
+
+- **Bounded separator** — `[^\p{L}\p{N}]*` (unbounded) replaced with `[^\p{L}\p{N}]{0,3}` (max 3 chars). Real-world evasions (`s.i.k.t.i.r`, `s_i_k`) use 1 separator char. This reduces backtracking from O(n^2) to O(1) per boundary.
+- **Regex timeout safety net** — Added 250ms timeout (`REGEX_TIMEOUT_MS`) to `runPatterns()` and `detectFuzzy()` loops. Never triggers on normal input (<1ms), but provides a hard cap on adversarial input.
+- **charClasses cleanup** — Removed separator-overlapping symbols from all 4 language configs (TR, EN, ES, DE). These symbols are already defined in `leetMap` and converted during the normalizer pass — removing them from pattern matching causes no false negatives.
+- **ReDoS test suite** — `tests/redos.test.ts`: 71 tests covering adversarial timing, attack surface (separator abuse, leet bypass, char repetition, Unicode tricks, whitelist integrity, boundary attacks, multi-match, input edge cases, suffix hardening).
+- **MAX_PATTERN_LENGTH** — 5000 → 6000. The `{0,3}` separator adds ~3 chars per boundary; raised the limit so large suffix patterns (e.g. `orospu`) don't fall back to non-suffix mode.
+- **Test count** — 548 → 619.
+
+| Change | File |
+|---|---|
+| Separator `*` → `{0,3}`, timeout constant | `src/patterns.ts` |
+| Timeout loop guard | `src/detector.ts` |
+| charClasses cleanup | `src/lang/{tr,en,es,de}/config.ts` |
+| ReDoS + attack surface test suite (new) | `tests/redos.test.ts` |
 
 ### 2026-02-28 (v2)
 
