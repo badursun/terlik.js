@@ -10,7 +10,7 @@ Production-grade multi-language profanity detection and filtering. Not a naive b
 
 Built-in support for **Turkish**, **English**, **Spanish**, and **German**. Adding a new language is just a folder with two files.
 
-Zero runtime dependencies. Full TypeScript. ESM + CJS.
+Zero runtime dependencies. Full TypeScript. ESM + CJS. Works in Node.js, Bun, Deno, browsers, Cloudflare Workers, and Edge runtimes — no Node.js-specific APIs used.
 
 ## Why terlik.js?
 
@@ -114,7 +114,7 @@ input
 
 Each language has its own char map, leet map, char classes, and optional number expansions. The engine is language-agnostic — only the data is language-specific.
 
-For suffixable roots, the engine appends an optional suffix group (up to 2 chained suffixes). Turkish has 81 suffixes (including question particles and adverbial forms), English has 6, Spanish has 9, German has 5.
+For suffixable roots, the engine appends an optional suffix group (up to 2 chained suffixes). Turkish has 83 suffixes (including question particles and adverbial forms), English has 8, Spanish has 13, German has 8.
 
 ### Language Packs
 
@@ -162,12 +162,12 @@ terlik.js ships with a **deliberately narrow dictionary** — the goal is to **m
 
 | Language | Roots | Explicit Variants | Suffixes | Whitelist | Effective Forms |
 |---|---|---|---|---|---|
-| Turkish | 25 | ~95 | 81 | 53 | ~3,000+ |
-| English | 23 | ~85 | 8 | 43 | ~700+ |
-| Spanish | 19 | ~55 | 12 | 15 | ~400+ |
-| German | 18 | ~45 | 8 | 3 | ~300+ |
+| Turkish | 25 | 88 | 83 | 52 | ~3,000+ |
+| English | 23 | 106 | 8 | 42 | ~700+ |
+| Spanish | 19 | 73 | 13 | 15 | ~500+ |
+| German | 18 | 48 | 8 | 3 | ~300+ |
 
-"Effective forms" = roots × normalization variants × suffix combinations × evasion patterns. A root like `sik` with 73 possible suffixes, leet decoding, separator tolerance, and repeat collapse produces thousands of detectable surface forms.
+"Effective forms" = roots × normalization variants × suffix combinations × evasion patterns. A root like `sik` with 83 possible suffixes, leet decoding, separator tolerance, and repeat collapse produces thousands of detectable surface forms.
 
 ### What IS Covered
 
@@ -255,7 +255,9 @@ app.post("/chat", (req, res) => {
 });
 ```
 
-> **Important:** Never create `new Terlik()` per request. A single cached instance handles requests in microseconds. For serverless (Lambda, Vercel), prefer explicit warmup over `backgroundWarmup` since `setTimeout` may not fire before the function freezes.
+> **Important:** Never create `new Terlik()` per request. A single cached instance handles requests in microseconds.
+
+> **Serverless (Lambda, Vercel, Cloudflare Workers):** Do NOT use `backgroundWarmup`. The `setTimeout` callback may never fire because serverless runtimes freeze the process between invocations. Use explicit warmup instead: `const t = new Terlik(); t.containsProfanity("warmup");` at module scope.
 
 ### Throughput
 
@@ -308,7 +310,7 @@ const terlik = new Terlik({
   customList: ["customword"],    // additional words to detect
   whitelist: ["safeword"],       // additional words to whitelist
   enableFuzzy: false,            // enable fuzzy matching
-  fuzzyThreshold: 0.8,           // similarity threshold (0-1)
+  fuzzyThreshold: 0.8,           // similarity threshold (0-1). 0.8 ≈ 1 typo per 5 chars
   fuzzyAlgorithm: "levenshtein", // "levenshtein" | "dice"
   maxLength: 10000,              // truncate input beyond this
   backgroundWarmup: false,       // compile patterns in background via setTimeout
@@ -453,7 +455,7 @@ See [CONTRIBUTING.md](./CONTRIBUTING.md) for contribution guidelines.
 - **Lazy compilation** — Pattern compilation deferred from constructor to first `detect()` call. `new Terlik()` drops from ~225ms to **~1.5ms**. Strict-mode users never pay regex cost (hash lookup only).
 - **`backgroundWarmup` option** — `new Terlik({ backgroundWarmup: true })` schedules compilation + JIT warmup via `setTimeout(fn, 0)`. Idempotent: if `detect()` is called before the timer fires, it compiles synchronously and the timer becomes a no-op.
 - **`detector.compile()` public method** — Allows manual precompilation for advanced use cases.
-- **Turkish suffix expansion** — Added 8 suffixes: question particles (`misin`, `misiniz`, `musun`, `musunuz`, `miyim`, `miyiz`) and adverbial forms (`cesine`, `casina`). All suffixable entries (orospu, piç, yarrak, ibne, etc.) now catch question and adverbial inflections.
+- **Turkish suffix expansion** — Added question particles (`misin`, `misiniz`, `musun`, `musunuz`, `miyim`, `miyiz`) and adverbial forms (`cesine`, `casina`) to suffix engine (now 83 total). All suffixable entries (orospu, piç, yarrak, ibne, etc.) now catch question and adverbial inflections.
 - **Deep agglutination variants** — Added explicit variants for `siktiğimin`, `sikermisiniz`, `sikermisin`, `siktirmişcesine`. These forms require 3+ suffix chains or non-standard morpheme boundaries (ğ→g bridge) that the suffix engine can't generalize without false positives.
 - **`MAX_PATTERN_LENGTH` 6000 → 10000** — Accommodates the larger suffix group without fallback to non-suffix mode.
 - **Test count** — 619 → 631. New `tests/lazy-compilation.test.ts` covers construction timing, transparent lazy compile, strict-mode optimization, backgroundWarmup with fake timers, and idempotent early-detect.
@@ -503,7 +505,7 @@ Identified vulnerability: overlap between `charClasses` and `separator` (`@`, `$
 **Suffix Engine + JSON Dictionary Migration**
 
 - **JSON dictionary** — Migrated dictionary from `tr.ts` to community-friendly `tr.json` format. Added runtime schema validation (`validateDictionary`). Each entry now includes `category` and `suffixable` fields.
-- **Suffix engine** — Defined 73 Turkish grammatical suffixes. Suffixable roots (`orospu`, `salak`, `aptal`, `kahpe`, etc.) automatically catch inflected forms like `orospuluk`, `salaksin`, `aptallarin`, `kahpeler`. Short roots (3-char: `sik`, `bok`, `göt`, `döl`) use explicit variants instead to prevent false positives.
+- **Suffix engine** — Defined Turkish grammatical suffixes (later expanded to 83 in v2.2). Suffixable roots (`orospu`, `salak`, `aptal`, `kahpe`, etc.) automatically catch inflected forms like `orospuluk`, `salaksin`, `aptallarin`, `kahpeler`. Short roots (3-char: `sik`, `bok`, `göt`, `döl`) use explicit variants instead to prevent false positives.
 - **Critical bug fix: `\W` separator** — JavaScript's `\W` treats Turkish characters (`ı`, `ş`, `ğ`, `ö`, `ü`, `ç`) as non-word characters. The pattern engine separator `[\W_]*` was changed to `[^\p{L}\p{N}]*` (Unicode-aware). This fixed false positives on innocent words like `sıkma`, `sıkıntı`, `sıkıştı`.
 - **Live test server warmup fix** — Fixed cache key mismatch and added JIT warmup. First request latency reduced from 3318ms to 37ms.
 - **Test coverage** — 101 → 346 tests. All 25 root words are comprehensively tested.
