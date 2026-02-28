@@ -5,7 +5,7 @@ import { getFuzzyMatcher } from "./fuzzy.js";
 
 export class Detector {
   private dictionary: Dictionary;
-  private patterns: CompiledPattern[];
+  private _patterns: CompiledPattern[] | null = null;
   private normalizedWordSet: Set<string>;
   private normalizedWordToRoot: Map<string, string>;
   private normalizeFn: (text: string) => string;
@@ -22,19 +22,29 @@ export class Detector {
     this.normalizeFn = normalizeFn;
     this.locale = locale;
     this.charClasses = charClasses;
-    this.patterns = compilePatterns(
-      dictionary.getEntries(),
-      dictionary.getSuffixes(),
-      charClasses,
-      normalizeFn,
-    );
     this.normalizedWordSet = new Set<string>();
     this.normalizedWordToRoot = new Map<string, string>();
     this.buildNormalizedLookup();
   }
 
+  private ensureCompiled(): CompiledPattern[] {
+    if (this._patterns === null) {
+      this._patterns = compilePatterns(
+        this.dictionary.getEntries(),
+        this.dictionary.getSuffixes(),
+        this.charClasses,
+        this.normalizeFn,
+      );
+    }
+    return this._patterns;
+  }
+
+  compile(): void {
+    this.ensureCompiled();
+  }
+
   recompile(): void {
-    this.patterns = compilePatterns(
+    this._patterns = compilePatterns(
       this.dictionary.getEntries(),
       this.dictionary.getSuffixes(),
       this.charClasses,
@@ -55,7 +65,7 @@ export class Detector {
 
   getPatterns(): Map<string, RegExp> {
     const map = new Map<string, RegExp>();
-    for (const p of this.patterns) {
+    for (const p of this.ensureCompiled()) {
       map.set(p.root, p.regex);
     }
     return map;
@@ -148,8 +158,9 @@ export class Detector {
     isNormalized: boolean,
   ): void {
     const existingIndices = new Set(results.map((r) => r.index));
+    const patterns = this.ensureCompiled();
 
-    for (const pattern of this.patterns) {
+    for (const pattern of patterns) {
       const patternStart = Date.now();
       pattern.regex.lastIndex = 0;
       let match: RegExpExecArray | null;

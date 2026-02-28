@@ -20,7 +20,9 @@
     "lik", "luk", "li", "lu", "ci", "cu", "ce", "ca",
     "le", "la",
     "ken", "esi",
-    "un", "lari", "leri", "larin", "lerin"
+    "un", "lari", "leri", "larin", "lerin",
+    "misin", "misiniz", "musun", "musunuz", "miyim", "miyiz",
+    "cesine", "casina"
   ],
   "entries": [
     {
@@ -30,7 +32,8 @@
         "sikim", "sikimle", "sikimin", "sikime",
         "sike", "siken", "siker", "sikti", "siktiler", "sikmis", "sikmek",
         "sikecek", "sikiyor", "sikme", "sikici", "siksin", "siktirler",
-        "sikimsonik", "siktirin", "siktiler", "sikerler", "sikiler"
+        "sikimsonik", "siktirin", "siktiler", "sikerler", "sikiler",
+        "siktiğimin", "sikermisiniz", "sikermisin", "siktirmişcesine"
       ],
       "severity": "high",
       "category": "sexual",

@@ -1,3 +1,5 @@
+declare function setTimeout(callback: () => void, ms: number): unknown;
+
 import type {
   CleanOptions,
   DetectOptions,
@@ -80,6 +82,13 @@ export class Terlik {
       langConfig.locale,
       langConfig.charClasses,
     );
+
+    if (options?.backgroundWarmup) {
+      setTimeout(() => {
+        this.detector.compile();
+        this.containsProfanity("warmup");
+      }, 0);
+    }
   }
 
   /**

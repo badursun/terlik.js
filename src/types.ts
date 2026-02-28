@@ -49,6 +49,8 @@ export interface TerlikOptions {
   maxLength?: number;
   /** Custom mask text for "replace" mask style (default: `"[***]"`). */
   replaceMask?: string;
+  /** Background'da regex derleme + JIT warmup. Default: false. Serverless'da önerilmez. */
+  backgroundWarmup?: boolean;
 }
 
 /** Per-call detection options that override instance defaults. */
