@@ -276,12 +276,12 @@ See [`live_test_server/README.md`](./live_test_server/README.md) for details.
 
 **Suffix Engine + JSON Dictionary Migration**
 
-- **JSON dictionary** — Sözlük `tr.ts`'den community-friendly `tr.json` formatına taşındı. Runtime schema validation (`validateDictionary`) eklendi. Her entry'ye `category` ve `suffixable` alanları eklendi.
-- **Suffix engine** — 73 Türkçe gramer eki tanımlandı. Suffixable kökler (`orospu`, `salak`, `aptal`, `kahpe` vb.) ekli formları otomatik yakalar: `orospuluk`, `salaksin`, `aptallarin`, `kahpeler` gibi. 3 harfli kökler (`sik`, `bok`, `göt`, `döl`) FP riski nedeniyle explicit varyant yaklaşımına alındı.
-- **Kritik bug fix: `\W` separator** — JavaScript'te `\W` Türkçe harfleri (`ı`, `ş`, `ğ`, `ö`, `ü`, `ç`) non-word olarak görüyordu. Pattern engine'deki separator `[\W_]*` → `[^\p{L}\p{N}]*` olarak düzeltildi. Bu `sıkma`, `sıkıntı`, `sıkıştı` gibi masum kelimelerin FP olarak yakalanmasını engelledi.
-- **Live test server warmup fix** — Cache key uyumsuzluğu ve JIT compilation eksikliği düzeltildi. İlk request latency 3318ms → 37ms.
-- **Test kapsamı** — 101 → 346 test. Tüm 25 kök kelime kapsamlı test ediliyor.
-- **Whitelist genişletildi** — `ama`, `ami`, `amen`, `amir`, `amil`, `dolmen` eklendi.
+- **JSON dictionary** — Migrated dictionary from `tr.ts` to community-friendly `tr.json` format. Added runtime schema validation (`validateDictionary`). Each entry now includes `category` and `suffixable` fields.
+- **Suffix engine** — Defined 73 Turkish grammatical suffixes. Suffixable roots (`orospu`, `salak`, `aptal`, `kahpe`, etc.) automatically catch inflected forms like `orospuluk`, `salaksin`, `aptallarin`, `kahpeler`. Short roots (3-char: `sik`, `bok`, `göt`, `döl`) use explicit variants instead to prevent false positives.
+- **Critical bug fix: `\W` separator** — JavaScript's `\W` treats Turkish characters (`ı`, `ş`, `ğ`, `ö`, `ü`, `ç`) as non-word characters. The pattern engine separator `[\W_]*` was changed to `[^\p{L}\p{N}]*` (Unicode-aware). This fixed false positives on innocent words like `sıkma`, `sıkıntı`, `sıkıştı`.
+- **Live test server warmup fix** — Fixed cache key mismatch and added JIT warmup. First request latency reduced from 3318ms to 37ms.
+- **Test coverage** — 101 → 346 tests. All 25 root words are comprehensively tested.
+- **Expanded whitelist** — Added `ama`, `ami`, `amen`, `amir`, `amil`, `dolmen`.
 
 ## License
 
