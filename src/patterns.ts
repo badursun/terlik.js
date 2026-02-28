@@ -1,34 +1,4 @@
 import type { CompiledPattern, WordEntry } from "./types.js";
-import { normalize } from "./normalizer.js";
-
-const CHAR_CLASSES: Record<string, string> = {
-  a: "[a4@àáâãäå]",
-  b: "[b8ß]",
-  c: "[cçÇ¢©]",
-  d: "[d]",
-  e: "[e3€èéêë]",
-  f: "[f]",
-  g: "[gğĞ69]",
-  h: "[h#]",
-  i: "[iıİ12!|ìíîï]",
-  j: "[j]",
-  k: "[k]",
-  l: "[l1|]",
-  m: "[m]",
-  n: "[nñ]",
-  o: "[o0öÖòóôõ]",
-  p: "[p]",
-  q: "[qk]",
-  r: "[r]",
-  s: "[s5$şŞß]",
-  t: "[t7+]",
-  u: "[uüÜùúûv]",
-  v: "[vu]",
-  w: "[w]",
-  x: "[x]",
-  y: "[y]",
-  z: "[z2]",
-};
 
 // \W is NOT Unicode-aware — ı, ş, ğ etc. count as \W in JS.
 // Use negated Unicode letter/number class instead to avoid eating Turkish chars.
@@ -37,27 +7,34 @@ const SEPARATOR = "[^\\p{L}\\p{N}]*";
 const MAX_PATTERN_LENGTH = 5000;
 const MAX_SUFFIX_CHAIN = 2;
 
-function charToPattern(ch: string): string {
-  const cls = CHAR_CLASSES[ch.toLowerCase()];
+function charToPattern(ch: string, charClasses: Record<string, string>): string {
+  const cls = charClasses[ch.toLowerCase()];
   if (cls) return `${cls}+`;
   // Escape regex special chars for unknown characters
   return ch.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "+";
 }
 
-function wordToPattern(word: string): string {
-  const normalized = normalize(word);
+function wordToPattern(
+  word: string,
+  charClasses: Record<string, string>,
+  normalizeFn: (text: string) => string,
+): string {
+  const normalized = normalizeFn(word);
   const chars = [...normalized];
-  const parts = chars.map(charToPattern);
+  const parts = chars.map((ch) => charToPattern(ch, charClasses));
   return parts.join(SEPARATOR);
 }
 
-function buildSuffixGroup(suffixes: string[]): string {
+function buildSuffixGroup(
+  suffixes: string[],
+  charClasses: Record<string, string>,
+): string {
   if (suffixes.length === 0) return "";
 
   // Convert each suffix to a char-class pattern with separators between chars
   const suffixPatterns = suffixes.map((suffix) => {
     const chars = [...suffix];
-    const parts = chars.map(charToPattern);
+    const parts = chars.map((ch) => charToPattern(ch, charClasses));
     return parts.join(SEPARATOR);
   });
 
@@ -68,28 +45,43 @@ function buildSuffixGroup(suffixes: string[]): string {
   return `(?:${SEPARATOR}(?:${suffixPatterns.join("|")}))`;
 }
 
+/**
+ * Compiles dictionary entries into regex patterns for profanity detection.
+ * Each entry produces a Unicode-aware regex with optional suffix support.
+ * Falls back gracefully if pattern compilation fails.
+ *
+ * @param entries - Dictionary entries keyed by root word.
+ * @param suffixes - Available grammatical suffixes for the language.
+ * @param charClasses - Character class mappings for visual similarity matching.
+ * @param normalizeFn - The language-specific normalize function.
+ * @returns Array of compiled patterns ready for detection.
+ */
 export function compilePatterns(
   entries: Map<string, WordEntry>,
-  suffixes?: string[],
+  suffixes: string[] | undefined,
+  charClasses: Record<string, string>,
+  normalizeFn: (text: string) => string,
 ): CompiledPattern[] {
   const patterns: CompiledPattern[] = [];
 
   // Build suffix group once, shared across all suffixable entries
   const suffixGroup = suffixes && suffixes.length > 0
-    ? buildSuffixGroup(suffixes)
+    ? buildSuffixGroup(suffixes, charClasses)
     : "";
 
   for (const [, entry] of entries) {
     const allForms = [entry.root, ...entry.variants];
     // Sort by length descending so longer variants match first
     const sortedForms = allForms
-      .map((w) => normalize(w))
+      .map((w) => normalizeFn(w))
       .filter((w) => w.length > 0)
       // Remove duplicates
       .filter((w, i, arr) => arr.indexOf(w) === i)
       .sort((a, b) => b.length - a.length);
 
-    const formPatterns = sortedForms.map(wordToPattern);
+    const formPatterns = sortedForms.map((w) =>
+      wordToPattern(w, charClasses, normalizeFn),
+    );
     const combined = formPatterns.join("|");
 
     // Determine if this entry gets suffix-aware boundary
@@ -117,7 +109,7 @@ export function compilePatterns(
         regex,
         variants: entry.variants,
       });
-    } catch {
+    } catch (err) {
       // Fallback: try without suffix if suffix caused the error
       if (useSuffix) {
         try {
@@ -129,9 +121,12 @@ export function compilePatterns(
             regex,
             variants: entry.variants,
           });
-        } catch {
-          // Skip invalid patterns silently
+          console.warn(`[terlik] Pattern for "${entry.root}" failed with suffixes, using fallback: ${err instanceof Error ? err.message : String(err)}`);
+        } catch (err2) {
+          console.warn(`[terlik] Pattern for "${entry.root}" failed completely, skipping: ${err2 instanceof Error ? err2.message : String(err2)}`);
         }
+      } else {
+        console.warn(`[terlik] Pattern for "${entry.root}" failed, skipping: ${err instanceof Error ? err.message : String(err)}`);
       }
     }
   }

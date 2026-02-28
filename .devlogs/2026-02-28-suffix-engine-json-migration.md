@@ -252,8 +252,78 @@ Warmup süresi arttı (one-time startup maliyeti) ama ilk request **~90x hızlan
 
 ---
 
+---
+
+## Multi-Language Support (aynı gün, ikinci güncelleme)
+
+### Motivasyon
+Sözlük JSON formatına geçtikten sonra, engine'in %80+'ı zaten dil-bağımsızdı. Hardcoded Türkçe veriyi (charMap, leetMap, charClasses, numberExpansions) parametrik hale getirerek çoklu dil desteği eklendi.
+
+### Mimari Değişiklik
+**Klasör bazlı dil paketleri:**
+```
+src/lang/
+  types.ts           ← LanguageConfig interface
+  index.ts           ← Build-time registry (statik import)
+  tr/config.ts + dictionary.json
+  en/config.ts + dictionary.json
+  es/config.ts + dictionary.json
+  de/config.ts + dictionary.json
+```
+
+### Refactor Edilen Dosyalar
+
+| Dosya | Değişiklik |
+|-------|-----------|
+| `src/normalizer.ts` | `createNormalizer(config)` factory eklendi. Türkçe inline constants korundu (backward compat) |
+| `src/patterns.ts` | `CHAR_CLASSES` hardcoded → parametre. `compilePatterns(entries, suffixes, charClasses, normalizeFn)` |
+| `src/dictionary/index.ts` | `Dictionary(data: DictionaryData, ...)` — statik tr.json import kaldırıldı |
+| `src/detector.ts` | Constructor: `(dictionary, normalizeFn, locale, charClasses)`. Tüm `normalize()` → `this.normalizeFn()` |
+| `src/terlik.ts` | `language` option, `getLanguageConfig()` wiring, `static warmup()`, `readonly language` prop |
+| `src/types.ts` | `TerlikOptions.language?: string` eklendi |
+| `src/index.ts` | Yeni export'lar: `createNormalizer`, `getLanguageConfig`, `getSupportedLanguages`, `LanguageConfig` |
+
+### Yeni Dil Paketleri
+- **English (en):** 8 entry (fuck, shit, asshole, bitch, bastard, dick, crap, damn), 6 suffix, 19 whitelist
+- **Spanish (es):** 6 entry (mierda, puta, cabron, joder, idiota, culo), 9 suffix, 7 whitelist
+- **German (de):** 6 entry (scheiße, fick, arsch, hurensohn, idiot, dumm), 5 suffix, 2 whitelist
+
+### Test Sonuçları
+- **346 → 418 test** (+72 yeni)
+- 5 yeni test dosyası: `en.test.ts`, `es.test.ts`, `de.test.ts`, `multi-lang.test.ts`, `registry.test.ts`
+- Cross-language isolation: Her dil instance'ı sadece kendi dilini algılar
+- `Terlik.warmup()` testleri: multi-language warmup, baseOptions, unsupported lang throw
+
+### API
+
+```ts
+// Default Türkçe (geriye uyumlu)
+const terlik = new Terlik();
+
+// Dil seçimi
+const en = new Terlik({ language: "en" });
+
+// Multi-language warmup
+const cache = Terlik.warmup(["tr", "en", "es", "de"]);
+
+// Bilgi
+terlik.language;            // "tr"
+getSupportedLanguages();    // ["tr", "en", "es", "de"]
+```
+
+### Yeni Dil Ekleme
+1. `src/lang/xx/` klasörü oluştur
+2. `dictionary.json` yaz (version, entries, suffixes, whitelist)
+3. `config.ts` yaz (locale, charMap, leetMap, charClasses + dictionary import)
+4. `src/lang/index.ts`'e 1 satır import ekle
+5. Test yaz, build, bitti
+
+---
+
 ## Geriye Uyumluluk
-- Public API değişmedi (`Terlik` class, `normalize`, types)
+- `new Terlik()` hala Türkçe, `language` default `"tr"`
+- `normalize()` export hala Türkçe default
 - `WordEntry`'ye eklenen alanlar opsiyonel
 - Suffix engine sadece match ekler, mevcut match'leri kaldırmaz
 - Separator fix FP'leri azaltır — breaking change değil, davranış iyileştirmesi
+- 346 mevcut test aynen geçer

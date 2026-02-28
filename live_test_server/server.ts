@@ -1,11 +1,12 @@
 import http from "node:http";
-import { Terlik, normalize } from "../src/index.js";
+import { Terlik, normalize, createNormalizer, getLanguageConfig, getSupportedLanguages } from "../src/index.js";
 import type { MatchResult, Mode, MaskStyle } from "../src/types.js";
 
 const PORT = 2026;
 
 interface AnalyzeRequest {
   text: string;
+  language: string;
   mode: Mode;
   maskStyle: MaskStyle;
   enableFuzzy: boolean;
@@ -27,10 +28,10 @@ const WARMUP_CONFIGS: Array<{ mode: Mode; maskStyle: MaskStyle; enableFuzzy: boo
   { mode: "loose", maskStyle: "stars", enableFuzzy: true },
 ];
 
-function buildCacheKey(mode: string, maskStyle: string, enableFuzzy: boolean, fuzzyThreshold: number, fuzzyAlgorithm: string, replaceMask: string, customWords?: string[], whitelist?: string[]): string {
+function buildCacheKey(language: string, mode: string, maskStyle: string, enableFuzzy: boolean, fuzzyThreshold: number, fuzzyAlgorithm: string, replaceMask: string, customWords?: string[], whitelist?: string[]): string {
   const cw = (customWords ?? []).sort().join(",");
   const wl = (whitelist ?? []).sort().join(",");
-  return `${mode}|${maskStyle}|${enableFuzzy}|${fuzzyThreshold}|${fuzzyAlgorithm}|${replaceMask}|${cw}|${wl}`;
+  return `${language}|${mode}|${maskStyle}|${enableFuzzy}|${fuzzyThreshold}|${fuzzyAlgorithm}|${replaceMask}|${cw}|${wl}`;
 }
 
 // Warmup sample texts to trigger V8 JIT compilation on regex patterns
@@ -42,31 +43,38 @@ const WARMUP_TEXTS = [
   "amsterdam sikke bokser malzeme",
 ];
 
-const warmupStart = performance.now();
-for (const cfg of WARMUP_CONFIGS) {
-  const key = buildCacheKey(cfg.mode, cfg.maskStyle, cfg.enableFuzzy, 0.8, "levenshtein", "[***]");
-  const instance = new Terlik({
-    mode: cfg.mode,
-    maskStyle: cfg.maskStyle,
-    enableFuzzy: cfg.enableFuzzy,
-    fuzzyThreshold: 0.8,
-    fuzzyAlgorithm: "levenshtein",
-    replaceMask: "[***]",
-  });
-  terlikCache.set(key, instance);
+const SUPPORTED_LANGUAGES = getSupportedLanguages();
 
-  // JIT warmup: run actual detection so V8 compiles the regex patterns
-  for (const text of WARMUP_TEXTS) {
-    instance.containsProfanity(text);
+const warmupStart = performance.now();
+for (const lang of SUPPORTED_LANGUAGES) {
+  for (const cfg of WARMUP_CONFIGS) {
+    const key = buildCacheKey(lang, cfg.mode, cfg.maskStyle, cfg.enableFuzzy, 0.8, "levenshtein", "[***]");
+    const instance = new Terlik({
+      language: lang,
+      mode: cfg.mode,
+      maskStyle: cfg.maskStyle,
+      enableFuzzy: cfg.enableFuzzy,
+      fuzzyThreshold: 0.8,
+      fuzzyAlgorithm: "levenshtein",
+      replaceMask: "[***]",
+    });
+    terlikCache.set(key, instance);
+
+    // JIT warmup: run actual detection so V8 compiles the regex patterns
+    for (const text of WARMUP_TEXTS) {
+      instance.containsProfanity(text);
+    }
   }
 }
 const warmupDuration = performance.now() - warmupStart;
 
 function getCachedTerlik(req: AnalyzeRequest): Terlik {
-  const key = buildCacheKey(req.mode, req.maskStyle, req.enableFuzzy, req.fuzzyThreshold, req.fuzzyAlgorithm, req.replaceMask, req.customWords, req.whitelist);
+  const lang = req.language || "tr";
+  const key = buildCacheKey(lang, req.mode, req.maskStyle, req.enableFuzzy, req.fuzzyThreshold, req.fuzzyAlgorithm, req.replaceMask, req.customWords, req.whitelist);
   let instance = terlikCache.get(key);
   if (!instance) {
     instance = new Terlik({
+      language: lang,
       mode: req.mode,
       maskStyle: req.maskStyle,
       enableFuzzy: req.enableFuzzy,
@@ -127,25 +135,34 @@ function analyze(req: AnalyzeRequest) {
     type: "info",
   });
 
-  // Step 3: Normalization
+  // Step 3: Normalization (language-aware)
+  const lang = req.language || "tr";
+  const langConfig = getLanguageConfig(lang);
+  const normalizeFn = createNormalizer({
+    locale: langConfig.locale,
+    charMap: langConfig.charMap,
+    leetMap: langConfig.leetMap,
+    numberExpansions: langConfig.numberExpansions,
+  });
+
   const t1 = performance.now();
-  const normalized = normalize(req.text);
+  const normalized = normalizeFn(req.text);
   const normDuration = performance.now() - t1;
   steps.push({
     step: "3",
     label: "Normalizasyon",
-    detail: `"${req.text}" → "${normalized}"`,
+    detail: `[${lang}] "${req.text}" → "${normalized}"`,
     duration: normDuration,
     type: "transform",
   });
 
   // Show normalization sub-steps
-  const lower = req.text.toLocaleLowerCase("tr");
+  const lower = req.text.toLocaleLowerCase(langConfig.locale);
   if (lower !== req.text) {
     steps.push({
       step: "3a",
       label: "  └ Küçük harf",
-      detail: `"${req.text}" → "${lower}"`,
+      detail: `"${req.text}" → "${lower}" (locale: ${langConfig.locale})`,
       type: "transform",
     });
   }
@@ -154,7 +171,7 @@ function analyze(req: AnalyzeRequest) {
     steps.push({
       step: "3b",
       label: "  └ Karakter dönüşümü",
-      detail: `Türkçe/leet/noktalama/tekrar → "${normalized}"`,
+      detail: `charMap/leet/noktalama/tekrar → "${normalized}"`,
       type: "transform",
     });
   }
@@ -166,7 +183,7 @@ function analyze(req: AnalyzeRequest) {
   steps.push({
     step: "4",
     label: "Motor hazır",
-    detail: `Mod: ${req.mode} | Maske: ${req.maskStyle}${req.maskStyle === "replace" ? ` ("${req.replaceMask}")` : ""} | Fuzzy: ${req.enableFuzzy ? `açık (${req.fuzzyAlgorithm}, eşik: ${req.fuzzyThreshold})` : "kapalı"}${(req.customWords?.length ?? 0) > 0 ? ` | +Kelime: ${req.customWords!.join(", ")}` : ""}${(req.whitelist?.length ?? 0) > 0 ? ` | Whitelist: ${req.whitelist!.join(", ")}` : ""}`,
+    detail: `Dil: ${lang} | Mod: ${req.mode} | Maske: ${req.maskStyle}${req.maskStyle === "replace" ? ` ("${req.replaceMask}")` : ""} | Fuzzy: ${req.enableFuzzy ? `açık (${req.fuzzyAlgorithm}, eşik: ${req.fuzzyThreshold})` : "kapalı"}${(req.customWords?.length ?? 0) > 0 ? ` | +Kelime: ${req.customWords!.join(", ")}` : ""}${(req.whitelist?.length ?? 0) > 0 ? ` | Whitelist: ${req.whitelist!.join(", ")}` : ""}`,
     duration: performance.now() - t2,
     type: "info",
   });
@@ -700,21 +717,7 @@ const HTML = /* html */ `<!DOCTYPE html>
         <span style="color:var(--accent2)">↓ Hazır örnekleri tek tıkla dene</span>
       </div>
     </div>
-    <div class="quick-tests">
-      <button class="quick-btn" data-text="merhaba dünya nasılsın">temiz mesaj</button>
-      <button class="quick-btn" data-text="siktir git burdan">düz küfür</button>
-      <button class="quick-btn" data-text="s.i.k.t.i.r git">ayraçlı</button>
-      <button class="quick-btn" data-text="$1kt1r lan">leet speak</button>
-      <button class="quick-btn" data-text="siiiiiktir">tekrar karakter</button>
-      <button class="quick-btn" data-text="SİKTİR GİT">türkçe büyük harf</button>
-      <button class="quick-btn" data-text="sikke koleksiyonu">whitelist test</button>
-      <button class="quick-btn" data-text="aptal orospu cocugu">çoklu eşleşme</button>
-      <button class="quick-btn" data-text="amsterdam güzel şehir">false positive</button>
-      <button class="quick-btn" data-text="8ok herif">visual leet 8→b</button>
-      <button class="quick-btn" data-text="6öt">visual leet 6→g</button>
-      <button class="quick-btn" data-text="i8ne">visual leet i8ne</button>
-      <button class="quick-btn" data-text="s2mle uğraş">TR sayı s2mle</button>
-    </div>
+    <div class="quick-tests" id="quickTests"></div>
 
     <!-- Tespit Ayarları -->
     <div class="settings-section">
@@ -722,6 +725,16 @@ const HTML = /* html */ `<!DOCTYPE html>
         <span class="arrow">▼</span> Tespit Ayarları
       </div>
       <div class="settings-row" id="settingsCore">
+        <div class="field">
+          <label>Dil</label>
+          <select id="optLanguage">
+            <option value="tr" selected>Türkçe (tr)</option>
+            <option value="en">English (en)</option>
+            <option value="es">Español (es)</option>
+            <option value="de">Deutsch (de)</option>
+          </select>
+          <span class="helper">Hangi dilde küfür tespiti yapılsın?</span>
+        </div>
         <div class="field">
           <label>Mod</label>
           <select id="optMode">
@@ -845,10 +858,81 @@ optMask.addEventListener('change', () => {
 });
 
 
+const QUICK_TESTS = {
+  tr: [
+    { text: 'merhaba dünya nasılsın', label: 'temiz mesaj' },
+    { text: 'siktir git burdan', label: 'düz küfür' },
+    { text: 's.i.k.t.i.r git', label: 'ayraçlı' },
+    { text: '$1kt1r lan', label: 'leet speak' },
+    { text: 'siiiiiktir', label: 'tekrar karakter' },
+    { text: 'SİKTİR GİT', label: 'büyük harf' },
+    { text: 'sikke koleksiyonu', label: 'whitelist' },
+    { text: 'aptal orospu cocugu', label: 'çoklu eşleşme' },
+    { text: 'amsterdam güzel şehir', label: 'false positive' },
+    { text: 'sıkıntı var', label: 'FP: sıkıntı' },
+  ],
+  en: [
+    { text: 'hello world', label: 'clean' },
+    { text: 'what the fuck', label: 'plain' },
+    { text: 'stop fucking around', label: 'variant' },
+    { text: 'f.u.c.k this', label: 'separator' },
+    { text: 'fck off', label: 'leet' },
+    { text: 'fuuuck', label: 'repeat' },
+    { text: '$h1t', label: 'leet shit' },
+    { text: 'son of a bitch', label: 'bitch' },
+    { text: 'the assassin escaped', label: 'whitelist' },
+    { text: 'first class ticket', label: 'FP: class' },
+  ],
+  es: [
+    { text: 'hola mundo', label: 'limpio' },
+    { text: 'hijo de puta', label: 'puta' },
+    { text: 'eso es una mierda', label: 'mierda' },
+    { text: 'eres un cabron', label: 'cabron' },
+    { text: 'joder tio', label: 'joder' },
+    { text: 'm.i.e.r.d.a', label: 'separador' },
+    { text: 'mi computadora', label: 'whitelist' },
+  ],
+  de: [
+    { text: 'hallo welt', label: 'sauber' },
+    { text: 'das ist scheiße', label: 'scheiße' },
+    { text: 'fick dich', label: 'fick' },
+    { text: 'du arschloch', label: 'arschloch' },
+    { text: 'scheisse', label: 'ohne ß' },
+    { text: 'f.i.c.k', label: 'separator' },
+    { text: 'du idiot', label: 'idiot' },
+  ],
+};
+
+function renderQuickTests(lang) {
+  const container = document.getElementById('quickTests');
+  container.innerHTML = '';
+  const tests = QUICK_TESTS[lang] || QUICK_TESTS['tr'];
+  for (const t of tests) {
+    const btn = document.createElement('button');
+    btn.className = 'quick-btn';
+    btn.setAttribute('data-text', t.text);
+    btn.textContent = t.label;
+    btn.addEventListener('click', () => {
+      chatInput.value = t.text;
+      send(t.text);
+    });
+    container.appendChild(btn);
+  }
+}
+
+// Language change → update quick tests
+document.getElementById('optLanguage').addEventListener('change', (e) => {
+  renderQuickTests(e.target.value);
+});
+
+// Initial render
+renderQuickTests('tr');
+
 function getOptions() {
   const cwRaw = document.getElementById('optCustomWords').value.trim();
   const wlRaw = document.getElementById('optWhitelist').value.trim();
   return {
+    language: document.getElementById('optLanguage').value,
     mode: document.getElementById('optMode').value,
     maskStyle: document.getElementById('optMask').value,
     enableFuzzy: document.getElementById('optFuzzy').checked,
@@ -939,13 +1023,7 @@ chatInput.addEventListener('keydown', (e) => {
   if (e.key === 'Enter') send(chatInput.value);
 });
 
-document.querySelectorAll('.quick-btn').forEach(btn => {
-  btn.addEventListener('click', () => {
-    const text = btn.getAttribute('data-text');
-    chatInput.value = text;
-    send(text);
-  });
-});
+// Quick test buttons are rendered dynamically by renderQuickTests()
 
 // Normalize standalone test
 document.getElementById('normalizeBtn').addEventListener('click', async () => {
@@ -1067,7 +1145,7 @@ server.listen(PORT, () => {
   console.log(`  │   http://localhost:${PORT}                      │`);
   console.log("  │                                              │");
   console.log("  │   Kaynak: src/ (build gereksiz)              │");
-  console.log(`  │   Warmup: ${warmupDuration.toFixed(1)}ms (${WARMUP_CONFIGS.length} config)              │`);
+  console.log(`  │   Warmup: ${warmupDuration.toFixed(1)}ms (${SUPPORTED_LANGUAGES.length} lang × ${WARMUP_CONFIGS.length} cfg) │`);
   console.log("  │   Çıkmak için: Ctrl+C                       │");
   console.log("  │                                              │");
   console.log("  └──────────────────────────────────────────────┘");

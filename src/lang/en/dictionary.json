@@ -1,0 +1,211 @@
+{
+  "version": 1,
+  "suffixes": ["ing", "ed", "er", "ers", "s", "es", "ly", "ness"],
+  "entries": [
+    {
+      "root": "fuck",
+      "variants": ["fucking", "fucker", "fucked", "fuckers", "fucks", "fck", "fuk", "fuking", "fcking", "stfu", "motherfucker", "motherfucking", "fuckface", "fuckwit", "clusterfuck", "mindfuck"],
+      "severity": "high",
+      "category": "sexual",
+      "suffixable": true
+    },
+    {
+      "root": "shit",
+      "variants": ["shitty", "bullshit", "shitting", "sht", "shits", "shite", "shithead", "shitstorm", "dipshit", "horseshit", "batshit", "apeshit", "shithole", "shitface", "shitshow"],
+      "severity": "high",
+      "category": "general",
+      "suffixable": true
+    },
+    {
+      "root": "ass",
+      "variants": ["asses", "arse", "arses", "asshat", "asswipe", "smartass", "dumbass", "fatass", "badass", "jackass", "lardass", "kickass"],
+      "severity": "medium",
+      "category": "insult",
+      "suffixable": false
+    },
+    {
+      "root": "asshole",
+      "variants": ["assholes", "arsehole", "arseholes"],
+      "severity": "high",
+      "category": "insult",
+      "suffixable": false
+    },
+    {
+      "root": "bitch",
+      "variants": ["bitches", "bitchy", "biatch", "bitching", "bitchass", "sonofabitch"],
+      "severity": "high",
+      "category": "insult",
+      "suffixable": true
+    },
+    {
+      "root": "bastard",
+      "variants": ["bastards", "bastardy"],
+      "severity": "medium",
+      "category": "insult",
+      "suffixable": true
+    },
+    {
+      "root": "dick",
+      "variants": ["dickhead", "dickheads", "dicks", "dickwad", "dickweed"],
+      "severity": "medium",
+      "category": "sexual",
+      "suffixable": false
+    },
+    {
+      "root": "cock",
+      "variants": ["cocks", "cocksucker", "cocksucking", "cockhead"],
+      "severity": "high",
+      "category": "sexual",
+      "suffixable": false
+    },
+    {
+      "root": "cunt",
+      "variants": ["cunts", "cunty"],
+      "severity": "high",
+      "category": "sexual",
+      "suffixable": true
+    },
+    {
+      "root": "whore",
+      "variants": ["whores", "whorish", "whorebag"],
+      "severity": "high",
+      "category": "insult",
+      "suffixable": true
+    },
+    {
+      "root": "slut",
+      "variants": ["sluts", "slutty", "slutbag"],
+      "severity": "high",
+      "category": "insult",
+      "suffixable": true
+    },
+    {
+      "root": "piss",
+      "variants": ["pissed", "pissing", "pisser", "pissoff", "pisshead"],
+      "severity": "medium",
+      "category": "general",
+      "suffixable": true
+    },
+    {
+      "root": "wank",
+      "variants": ["wanker", "wankers", "wanking"],
+      "severity": "medium",
+      "category": "sexual",
+      "suffixable": true
+    },
+    {
+      "root": "twat",
+      "variants": ["twats"],
+      "severity": "high",
+      "category": "sexual",
+      "suffixable": true
+    },
+    {
+      "root": "bollocks",
+      "variants": ["bollock", "bollocked"],
+      "severity": "medium",
+      "category": "general",
+      "suffixable": false
+    },
+    {
+      "root": "crap",
+      "variants": ["crappy", "craps"],
+      "severity": "low",
+      "category": "general",
+      "suffixable": true
+    },
+    {
+      "root": "damn",
+      "variants": ["damned", "damnit", "dammit", "goddamn", "goddamnit"],
+      "severity": "low",
+      "category": "general",
+      "suffixable": false
+    },
+    {
+      "root": "retard",
+      "variants": ["retards", "retarded", "retardation"],
+      "severity": "high",
+      "category": "slur",
+      "suffixable": false
+    },
+    {
+      "root": "nigger",
+      "variants": ["niggers", "nigga", "niggas", "nigg3r"],
+      "severity": "high",
+      "category": "slur",
+      "suffixable": false
+    },
+    {
+      "root": "faggot",
+      "variants": ["faggots", "fag", "fags", "faggy"],
+      "severity": "high",
+      "category": "slur",
+      "suffixable": false
+    },
+    {
+      "root": "douche",
+      "variants": ["douchebag", "douchebags", "douchy", "douchey"],
+      "severity": "medium",
+      "category": "insult",
+      "suffixable": true
+    },
+    {
+      "root": "tosser",
+      "variants": ["tossers"],
+      "severity": "medium",
+      "category": "insult",
+      "suffixable": false
+    },
+    {
+      "root": "wanker",
+      "variants": ["wankers"],
+      "severity": "medium",
+      "category": "insult",
+      "suffixable": false
+    }
+  ],
+  "whitelist": [
+    "assembly",
+    "assist",
+    "assassin",
+    "bass",
+    "class",
+    "classic",
+    "classify",
+    "grass",
+    "mass",
+    "massive",
+    "pass",
+    "passage",
+    "passenger",
+    "passion",
+    "passive",
+    "passport",
+    "assume",
+    "assignment",
+    "associate",
+    "assertion",
+    "asset",
+    "assess",
+    "dickens",
+    "cocktail",
+    "cockatoo",
+    "peacock",
+    "hancock",
+    "scrap",
+    "scrappy",
+    "shitake",
+    "document",
+    "buckle",
+    "piston",
+    "bassist",
+    "embassy",
+    "cassette",
+    "hassle",
+    "lasso",
+    "massage",
+    "compass",
+    "trespass",
+    "harass"
+  ]
+}

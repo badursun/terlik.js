@@ -1,3 +1,11 @@
+/**
+ * Computes the Levenshtein edit distance between two strings.
+ * Uses O(n) space optimization with two-row approach.
+ *
+ * @param a - First string.
+ * @param b - Second string.
+ * @returns The minimum number of single-character edits (insertions, deletions, substitutions).
+ */
 export function levenshteinDistance(a: string, b: string): number {
   const m = a.length;
   const n = b.length;
@@ -27,6 +35,14 @@ export function levenshteinDistance(a: string, b: string): number {
   return prev[n];
 }
 
+/**
+ * Computes the Levenshtein similarity ratio between two strings.
+ * Returns a value between 0 (completely different) and 1 (identical).
+ *
+ * @param a - First string.
+ * @param b - Second string.
+ * @returns Similarity ratio (0–1).
+ */
 export function levenshteinSimilarity(a: string, b: string): number {
   const maxLen = Math.max(a.length, b.length);
   if (maxLen === 0) return 1;
@@ -41,6 +57,14 @@ function bigrams(str: string): Set<string> {
   return set;
 }
 
+/**
+ * Computes the Dice coefficient (bigram similarity) between two strings.
+ * Returns a value between 0 (no shared bigrams) and 1 (identical bigrams).
+ *
+ * @param a - First string (must be at least 2 characters for meaningful result).
+ * @param b - Second string (must be at least 2 characters for meaningful result).
+ * @returns Dice coefficient (0–1).
+ */
 export function diceSimilarity(a: string, b: string): number {
   if (a.length < 2 || b.length < 2) {
     return a === b ? 1 : 0;
@@ -57,8 +81,14 @@ export function diceSimilarity(a: string, b: string): number {
   return (2 * intersection) / (bigramsA.size + bigramsB.size);
 }
 
+/** A function that computes similarity between two strings, returning 0–1. */
 export type FuzzyMatchFn = (a: string, b: string) => number;
 
+/**
+ * Returns the appropriate fuzzy matching function for the given algorithm.
+ * @param algorithm - The algorithm to use.
+ * @returns The similarity function.
+ */
 export function getFuzzyMatcher(algorithm: "levenshtein" | "dice"): FuzzyMatchFn {
   return algorithm === "levenshtein" ? levenshteinSimilarity : diceSimilarity;
 }

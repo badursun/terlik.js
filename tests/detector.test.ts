@@ -1,10 +1,18 @@
 import { describe, it, expect } from "vitest";
 import { Detector } from "../src/detector.js";
 import { Dictionary } from "../src/dictionary/index.js";
+import { config as trConfig } from "../src/lang/tr/config.js";
+import { createNormalizer } from "../src/normalizer.js";
 
 describe("detector", () => {
-  const dictionary = new Dictionary();
-  const detector = new Detector(dictionary);
+  const normalizeFn = createNormalizer({
+    locale: trConfig.locale,
+    charMap: trConfig.charMap,
+    leetMap: trConfig.leetMap,
+    numberExpansions: trConfig.numberExpansions,
+  });
+  const dictionary = new Dictionary(trConfig.dictionary);
+  const detector = new Detector(dictionary, normalizeFn, trConfig.locale, trConfig.charClasses);
 
   describe("pattern mode (balanced)", () => {
     it("detects plain profanity", () => {

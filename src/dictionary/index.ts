@@ -1,28 +1,24 @@
 import type { WordEntry } from "../types.js";
-import trData from "./tr.json";
-import { validateDictionary } from "./schema.js";
 import type { DictionaryData } from "./schema.js";
 
-let validatedData: DictionaryData;
-try {
-  validatedData = validateDictionary(trData);
-} catch (e) {
-  throw new Error(
-    `Dictionary validation failed: ${e instanceof Error ? e.message : String(e)}`,
-  );
-}
-
-const TR_ENTRIES = validatedData.entries;
-const TR_WHITELIST = validatedData.whitelist;
-const TR_SUFFIXES = validatedData.suffixes;
-
+/**
+ * Manages the profanity word list, whitelist, and suffixes for a language.
+ */
 export class Dictionary {
   private entries: Map<string, WordEntry> = new Map();
   private whitelist: Set<string>;
   private allWords: string[] = [];
+  private suffixes: string[];
 
-  constructor(customWords?: string[], customWhitelist?: string[]) {
-    this.whitelist = new Set(TR_WHITELIST.map((w) => w.toLowerCase()));
+  /**
+   * Creates a new Dictionary from validated dictionary data.
+   * @param data - Validated dictionary data (entries, suffixes, whitelist).
+   * @param customWords - Additional words to detect.
+   * @param customWhitelist - Additional words to exclude.
+   */
+  constructor(data: DictionaryData, customWords?: string[], customWhitelist?: string[]) {
+    this.whitelist = new Set(data.whitelist.map((w) => w.toLowerCase()));
+    this.suffixes = data.suffixes;
 
     if (customWhitelist) {
       for (const w of customWhitelist) {
@@ -30,7 +26,7 @@ export class Dictionary {
       }
     }
 
-    for (const entry of TR_ENTRIES) {
+    for (const entry of data.entries) {
       this.addEntry({
         root: entry.root,
         variants: entry.variants,
@@ -60,27 +56,38 @@ export class Dictionary {
     }
   }
 
+  /** Returns all dictionary entries keyed by root word. */
   getEntries(): Map<string, WordEntry> {
     return this.entries;
   }
 
+  /** Returns all words (roots + variants) as a flat array. */
   getAllWords(): string[] {
     return this.allWords;
   }
 
+  /** Returns the whitelist as a Set of lowercase strings. */
   getWhitelist(): Set<string> {
     return this.whitelist;
   }
 
+  /** Returns available grammatical suffixes for the language. */
   getSuffixes(): string[] {
-    return TR_SUFFIXES;
+    return this.suffixes;
   }
 
+  /**
+   * Adds words to the dictionary at runtime.
+   * Empty strings and already-existing words are silently skipped.
+   * @param words - Words to add.
+   */
   addWords(words: string[]): void {
     for (const word of words) {
-      if (!this.entries.has(word.toLowerCase())) {
+      const lower = word.toLowerCase().trim();
+      if (lower.length === 0) continue;
+      if (!this.entries.has(lower)) {
         this.addEntry({
-          root: word.toLowerCase(),
+          root: lower,
           variants: [],
           severity: "medium",
         });
@@ -88,6 +95,10 @@ export class Dictionary {
     }
   }
 
+  /**
+   * Removes words from the dictionary at runtime.
+   * @param words - Words to remove.
+   */
   removeWords(words: string[]): void {
     for (const word of words) {
       const key = word.toLowerCase();
@@ -101,6 +112,11 @@ export class Dictionary {
     }
   }
 
+  /**
+   * Finds the dictionary entry for a given word (checks root and variants).
+   * @param word - The word to look up.
+   * @returns The matching WordEntry, or undefined if not found.
+   */
   findRootForWord(word: string): WordEntry | undefined {
     const lower = word.toLowerCase();
     const direct = this.entries.get(lower);

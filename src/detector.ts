@@ -1,5 +1,4 @@
 import type { CompiledPattern, DetectOptions, MatchResult, Mode } from "./types.js";
-import { normalize } from "./normalizer.js";
 import { Dictionary } from "./dictionary/index.js";
 import { compilePatterns } from "./patterns.js";
 import { getFuzzyMatcher } from "./fuzzy.js";
@@ -9,17 +8,38 @@ export class Detector {
   private patterns: CompiledPattern[];
   private normalizedWordSet: Set<string>;
   private normalizedWordToRoot: Map<string, string>;
+  private normalizeFn: (text: string) => string;
+  private locale: string;
+  private charClasses: Record<string, string>;
 
-  constructor(dictionary: Dictionary) {
+  constructor(
+    dictionary: Dictionary,
+    normalizeFn: (text: string) => string,
+    locale: string,
+    charClasses: Record<string, string>,
+  ) {
     this.dictionary = dictionary;
-    this.patterns = compilePatterns(dictionary.getEntries(), dictionary.getSuffixes());
+    this.normalizeFn = normalizeFn;
+    this.locale = locale;
+    this.charClasses = charClasses;
+    this.patterns = compilePatterns(
+      dictionary.getEntries(),
+      dictionary.getSuffixes(),
+      charClasses,
+      normalizeFn,
+    );
     this.normalizedWordSet = new Set<string>();
     this.normalizedWordToRoot = new Map<string, string>();
     this.buildNormalizedLookup();
   }
 
   recompile(): void {
-    this.patterns = compilePatterns(this.dictionary.getEntries(), this.dictionary.getSuffixes());
+    this.patterns = compilePatterns(
+      this.dictionary.getEntries(),
+      this.dictionary.getSuffixes(),
+      this.charClasses,
+      this.normalizeFn,
+    );
     this.buildNormalizedLookup();
   }
 
@@ -27,7 +47,7 @@ export class Detector {
     this.normalizedWordSet.clear();
     this.normalizedWordToRoot.clear();
     for (const word of this.dictionary.getAllWords()) {
-      const n = normalize(word);
+      const n = this.normalizeFn(word);
       this.normalizedWordSet.add(n);
       this.normalizedWordToRoot.set(n, word);
     }
@@ -66,7 +86,7 @@ export class Detector {
     whitelist: Set<string>,
     results: MatchResult[],
   ): void {
-    const normalized = normalize(text);
+    const normalized = this.normalizeFn(text);
     const words = normalized.split(/\s+/);
     const originalWords = text.split(/\s+/);
 
@@ -113,8 +133,8 @@ export class Detector {
 
     // Second pass on normalized text only if normalization changed something
     // beyond simple lowercasing (leet, numExpand, punctuation removal, etc.)
-    const normalizedText = normalize(text);
-    const lowerText = text.toLocaleLowerCase("tr");
+    const normalizedText = this.normalizeFn(text);
+    const lowerText = text.toLocaleLowerCase(this.locale);
     if (normalizedText !== lowerText && normalizedText.length > 0) {
       this.runPatterns(normalizedText, text, whitelist, results, true);
     }
@@ -137,11 +157,11 @@ export class Detector {
         const matchedText = match[0];
         const matchIndex = match.index;
 
-        const normalizedMatch = normalize(matchedText);
+        const normalizedMatch = this.normalizeFn(matchedText);
         if (whitelist.has(normalizedMatch)) continue;
 
         const surrounding = this.getSurroundingWord(searchText, matchIndex, matchedText.length);
-        const normalizedSurrounding = normalize(surrounding);
+        const normalizedSurrounding = this.normalizeFn(surrounding);
         if (whitelist.has(normalizedSurrounding)) continue;
 
         if (isNormalized) {
@@ -195,7 +215,7 @@ export class Detector {
         continue;
       }
 
-      const normWord = normalize(segment);
+      const normWord = this.normalizeFn(segment);
       const normEnd = normOffset + normWord.length;
 
       // Check if the normalized match overlaps with this word's normalized range
@@ -217,7 +237,7 @@ export class Detector {
     threshold: number,
     algorithm: "levenshtein" | "dice",
   ): void {
-    const normalized = normalize(text);
+    const normalized = this.normalizeFn(text);
     const normWords = normalized.split(/\s+/);
     const origWords = text.split(/\s+/);
     const matcher = getFuzzyMatcher(algorithm);

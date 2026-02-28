@@ -1,79 +1,41 @@
-const TURKISH_CHAR_MAP: Record<string, string> = {
-  ç: "c",
-  Ç: "c",
-  ğ: "g",
-  Ğ: "g",
-  ı: "i",
-  İ: "i",
-  ö: "o",
-  Ö: "o",
-  ş: "s",
-  Ş: "s",
-  ü: "u",
-  Ü: "u",
-};
+// ─── Types ───────────────────────────────────────────
 
-const LEET_MAP: Record<string, string> = {
-  "0": "o",
-  "1": "i",
-  "2": "i", // görsel benzerlik (ters 2 ≈ i)
-  "3": "e",
-  "4": "a",
-  "5": "s",
-  "6": "g", // görsel benzerlik (6 ≈ g)
-  "7": "t",
-  "8": "b", // görsel benzerlik (8 ≈ b)
-  "9": "g", // görsel benzerlik (9 ≈ g/q)
-  "@": "a",
-  $: "s",
-  "!": "i",
-};
-
-function toLowercase(text: string): string {
-  return text.toLocaleLowerCase("tr");
+/** Configuration for creating a language-specific normalizer. */
+export interface NormalizerConfig {
+  locale: string;
+  charMap: Record<string, string>;
+  leetMap: Record<string, string>;
+  numberExpansions?: [string, string][];
 }
 
-function replaceTurkishChars(text: string): string {
+// ─── Language-agnostic helpers ───────────────────────
+
+function replaceFromMap(text: string, map: Record<string, string>): string {
   let result = "";
   for (const ch of text) {
-    result += TURKISH_CHAR_MAP[ch] ?? ch;
+    result += map[ch] ?? ch;
   }
   return result;
 }
 
-function replaceLeetspeak(text: string): string {
-  let result = "";
-  for (const ch of text) {
-    result += LEET_MAP[ch] ?? ch;
-  }
-  return result;
-}
+function buildNumberExpander(
+  expansions: [string, string][],
+): ((text: string) => string) | null {
+  if (expansions.length === 0) return null;
 
-// Türkçe sayı okunuşları — büyükten küçüğe sıralı (greedy match)
-// Tek haneli 6, 8, 9 burada YOK — bunlar leet map'te (6→g, 8→b, 9→g) handle ediliyor.
-// Sadece 2→iki (çok yaygın TR evasion) ve çok haneli sayılar burada.
-// Kural: harf+sayı+harf (her iki tarafta harf zorunlu)
-const TR_NUMBER_MAP: [string, string][] = [
-  ["100", "yuz"],
-  ["50", "elli"],
-  ["10", "on"],
-  ["2", "iki"],
-];
+  const regex = new RegExp(
+    expansions
+      .map(([num]) => {
+        const escaped = num.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+        return `(?<=\\p{L})${escaped}(?=\\p{L})`;
+      })
+      .join("|"),
+    "gu",
+  );
+  const lookup: Record<string, string> = Object.fromEntries(expansions);
 
-// Kural: harf + sayı + harf (her iki tarafta da harf olmalı)
-// Bağımsız sayılara ve tek taraflı yapışıklığa dokunma
-const TR_NUMBER_REGEX = new RegExp(
-  TR_NUMBER_MAP.map(([num]) => {
-    const escaped = num.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-    return `(?<=\\p{L})${escaped}(?=\\p{L})`;
-  }).join("|"),
-  "gu",
-);
-
-const TR_NUMBER_LOOKUP: Record<string, string> = Object.fromEntries(TR_NUMBER_MAP);
-
-function expandTurkishNumbers(text: string): string {
-  return text.replace(TR_NUMBER_REGEX, (match) => TR_NUMBER_LOOKUP[match] ?? match);
+  return (text: string) =>
+    text.replace(regex, (match) => lookup[match] ?? match);
 }
 
 function removePunctuation(text: string): string {
@@ -88,16 +50,105 @@ function trimWhitespace(text: string): string {
   return text.replace(/\s+/g, " ").trim();
 }
 
+// ─── Factory: creates a normalize function for any language ───
+
+/**
+ * Creates a language-specific normalize function using the given config.
+ * The returned function applies a 6-stage pipeline: lowercase, char folding,
+ * number expansion, leet decode, punctuation removal, repeat collapse.
+ *
+ * @param config - Language-specific normalization settings.
+ * @returns A normalize function for the configured language.
+ *
+ * @example
+ * ```ts
+ * const normalize = createNormalizer({
+ *   locale: "de",
+ *   charMap: { ä: "a", ö: "o", ü: "u", ß: "ss" },
+ *   leetMap: { "0": "o", "3": "e" },
+ * });
+ * normalize("Scheiße"); // "scheisse"
+ * ```
+ */
+export function createNormalizer(config: NormalizerConfig): (text: string) => string {
+  const expandNumbers = config.numberExpansions
+    ? buildNumberExpander(config.numberExpansions)
+    : null;
+
+  return function normalize(text: string): string {
+    let result = text;
+    result = result.toLocaleLowerCase(config.locale);
+    result = replaceFromMap(result, config.charMap);
+    if (expandNumbers) {
+      result = expandNumbers(result);
+    }
+    result = replaceFromMap(result, config.leetMap);
+    result = removePunctuation(result);
+    result = collapseRepeats(result);
+    result = trimWhitespace(result);
+    return result;
+  };
+}
+
+// ─── Backward-compatible Turkish defaults ────────────
+// Inline constants to avoid circular imports with lang/tr/config.ts
+
+const TURKISH_CHAR_MAP: Record<string, string> = {
+  ç: "c", Ç: "c", ğ: "g", Ğ: "g", ı: "i", İ: "i",
+  ö: "o", Ö: "o", ş: "s", Ş: "s", ü: "u", Ü: "u",
+};
+
+const LEET_MAP: Record<string, string> = {
+  "0": "o", "1": "i", "2": "i", "3": "e", "4": "a",
+  "5": "s", "6": "g", "7": "t", "8": "b", "9": "g",
+  "@": "a", $: "s", "!": "i",
+};
+
+const TR_NUMBER_MAP: [string, string][] = [
+  ["100", "yuz"], ["50", "elli"], ["10", "on"], ["2", "iki"],
+];
+
+const _turkishNormalize = createNormalizer({
+  locale: "tr",
+  charMap: TURKISH_CHAR_MAP,
+  leetMap: LEET_MAP,
+  numberExpansions: TR_NUMBER_MAP,
+});
+
+/**
+ * Normalizes text using the default Turkish locale pipeline.
+ * Shorthand for `createNormalizer()` with Turkish defaults.
+ *
+ * @param text - The text to normalize.
+ * @returns The normalized text.
+ *
+ * @example
+ * ```ts
+ * normalize("S.İ.K.T.İ.R"); // "siktir"
+ * normalize("$1kt1r");       // "siktir"
+ * ```
+ */
 export function normalize(text: string): string {
-  let result = text;
-  result = toLowercase(result);
-  result = replaceTurkishChars(result);
-  result = expandTurkishNumbers(result);
-  result = replaceLeetspeak(result);
-  result = removePunctuation(result);
-  result = collapseRepeats(result);
-  result = trimWhitespace(result);
-  return result;
+  return _turkishNormalize(text);
+}
+
+// ─── Individual exports for test backward compat ─────
+
+function toLowercase(text: string): string {
+  return text.toLocaleLowerCase("tr");
+}
+
+function replaceTurkishChars(text: string): string {
+  return replaceFromMap(text, TURKISH_CHAR_MAP);
+}
+
+function replaceLeetspeak(text: string): string {
+  return replaceFromMap(text, LEET_MAP);
+}
+
+function expandTurkishNumbers(text: string): string {
+  const expander = buildNumberExpander(TR_NUMBER_MAP);
+  return expander ? expander(text) : text;
 }
 
 export {

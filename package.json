@@ -24,9 +24,11 @@
     "build": "tsup",
     "test": "vitest run",
     "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
     "bench": "tsx benchmarks/bench.ts",
     "typecheck": "tsc --noEmit",
-    "dev:live": "tsx watch live_test_server/server.ts"
+    "dev:live": "tsx watch live_test_server/server.ts",
+    "prepare": "husky"
   },
   "keywords": [
     "profanity",
@@ -37,9 +39,21 @@
     "kufur",
     "turkce"
   ],
-  "author": "",
+  "author": "Anthony Burak DURSUN",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/badursun/terlik.js.git"
+  },
+  "homepage": "https://github.com/badursun/terlik.js#readme",
+  "bugs": {
+    "url": "https://github.com/badursun/terlik.js/issues"
+  },
+  "sideEffects": false,
   "devDependencies": {
+    "@vitest/coverage-v8": "^2.0.0",
+    "husky": "^9.0.0",
+    "lint-staged": "^15.0.0",
     "tsup": "^8.0.0",
     "typescript": "^5.4.0",
     "vitest": "^2.0.0",

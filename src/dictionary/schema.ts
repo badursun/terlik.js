@@ -3,6 +3,7 @@ const VALID_CATEGORIES = ["sexual", "insult", "slur", "general"];
 const MAX_SUFFIXES = 100;
 const SUFFIX_PATTERN = /^[a-z]{1,10}$/;
 
+/** Raw dictionary data structure as loaded from JSON. */
 export interface DictionaryData {
   version: number;
   suffixes: string[];
@@ -16,6 +17,14 @@ export interface DictionaryData {
   whitelist: string[];
 }
 
+/**
+ * Validates raw dictionary data against the expected schema.
+ * Checks version, suffix format, entry fields, and whitelist integrity.
+ *
+ * @param data - The raw data to validate (typically parsed from JSON).
+ * @returns The validated dictionary data.
+ * @throws {Error} If validation fails with a descriptive message.
+ */
 export function validateDictionary(data: unknown): DictionaryData {
   if (data == null || typeof data !== "object") {
     throw new Error("Dictionary data must be a non-null object");
@@ -95,10 +104,19 @@ export function validateDictionary(data: unknown): DictionaryData {
     throw new Error("Dictionary whitelist must be an array");
   }
 
+  const seenWhitelist = new Set<string>();
   for (let i = 0; i < d.whitelist.length; i++) {
     if (typeof d.whitelist[i] !== "string") {
       throw new Error(`whitelist[${i}]: must be a string`);
     }
+    if ((d.whitelist[i] as string).length === 0) {
+      throw new Error(`whitelist[${i}]: must not be empty`);
+    }
+    const wlLower = (d.whitelist[i] as string).toLowerCase();
+    if (seenWhitelist.has(wlLower)) {
+      throw new Error(`whitelist[${i}]: duplicate entry "${d.whitelist[i]}"`);
+    }
+    seenWhitelist.add(wlLower);
   }
 
   return data as DictionaryData;

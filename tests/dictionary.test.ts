@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import trData from "../src/dictionary/tr.json";
+import trData from "../src/lang/tr/dictionary.json";
 import { validateDictionary } from "../src/dictionary/schema.js";
 
 describe("dictionary JSON schema", () => {
@@ -173,5 +173,27 @@ describe("validateDictionary rejection", () => {
         whitelist: [],
       }),
     ).toThrow(/maximum/);
+  });
+
+  it("rejects empty whitelist entry", () => {
+    expect(() =>
+      validateDictionary({
+        version: 1,
+        suffixes: [],
+        entries: [],
+        whitelist: ["valid", ""],
+      }),
+    ).toThrow(/empty/);
+  });
+
+  it("rejects duplicate whitelist entry", () => {
+    expect(() =>
+      validateDictionary({
+        version: 1,
+        suffixes: [],
+        entries: [],
+        whitelist: ["word", "word"],
+      }),
+    ).toThrow(/duplicate/);
   });
 });

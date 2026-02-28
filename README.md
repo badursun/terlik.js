@@ -2,7 +2,13 @@
 
 ![terlik.js](git-header.png)
 
-Production-grade Turkish profanity detection and filtering. Not a naive blacklist — a multi-layered normalization and pattern engine that catches what simple string matching misses.
+[![CI](https://github.com/badursun/terlik.js/actions/workflows/ci.yml/badge.svg)](https://github.com/badursun/terlik.js/actions/workflows/ci.yml)
+[![npm version](https://img.shields.io/npm/v/terlik.js.svg)](https://www.npmjs.com/package/terlik.js)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
+Production-grade multi-language profanity detection and filtering. Not a naive blacklist — a multi-layered normalization and pattern engine that catches what simple string matching misses.
+
+Built-in support for **Turkish**, **English**, **Spanish**, and **German**. Adding a new language is just a folder with two files.
 
 Zero runtime dependencies. Full TypeScript. ESM + CJS.
 
@@ -36,22 +42,21 @@ yarn add terlik.js
 ```ts
 import { Terlik } from "terlik.js";
 
-const terlik = new Terlik();
+// Turkish (default)
+const tr = new Terlik();
+tr.containsProfanity("siktir git");  // true
+tr.clean("siktir git burdan");       // "****** git burdan"
 
-// Detect
-terlik.containsProfanity("siktir git");  // true
-terlik.containsProfanity("merhaba");     // false
+// English
+const en = new Terlik({ language: "en" });
+en.containsProfanity("what the fuck"); // true
+en.containsProfanity("siktir git");    // false (Turkish not loaded)
 
-// Clean
-terlik.clean("siktir git burdan");
-// "****** git burdan"
-
-// Inspect matches
-terlik.getMatches("aptal orospu cocugu");
-// [
-//   { word: "aptal", root: "aptal", severity: "low", method: "pattern", index: 0 },
-//   { word: "orospu cocugu", root: "orospu", severity: "high", method: "pattern", index: 6 }
-// ]
+// Spanish & German
+const es = new Terlik({ language: "es" });
+const de = new Terlik({ language: "de" });
+es.containsProfanity("hijo de puta");  // true
+de.containsProfanity("scheiße");       // true
 ```
 
 ## What It Catches
@@ -90,40 +95,62 @@ terlik.containsProfanity("dolmen");       // false
 
 ## How It Works
 
-Six-stage normalization pipeline, then pattern matching:
+Six-stage normalization pipeline (language-aware), then pattern matching:
 
 ```
 input
-  → lowercase (Turkish locale-aware)
-  → Turkish char folding (İ→i, ç→c, ğ→g, ö→o, ş→s, ü→u)
-  → Turkish number expansion (s2k → sikik, only between letters)
-  → Leet speak decode (0→o, 1→i, 2→i, 8→b, 6→g, $→s, @→a, ...)
-  → Punctuation removal (between letters: s.i.k → sik)
-  → Repeat collapse (siiiiik → sik)
-  → Pattern matching (dynamic regex with char class substitutions)
-  → Whitelist filtering
-  → Result
+  → lowercase (locale-aware: "tr", "en", "es", "de")
+  → char folding (language-specific: İ→i, ñ→n, ß→ss, ä→a, ...)
+  → number expansion (optional, e.g. Turkish: s2k → sikik)
+  → leet speak decode (0→o, 1→i, @→a, $→s, ...)
+  → punctuation removal (between letters: s.i.k → sik)
+  → repeat collapse (siiiiik → sik)
+  → pattern matching (dynamic regex with language-specific char classes)
+  → whitelist filtering
+  → result
 ```
 
-Pattern engine generates regex per root word with full substitution maps. For example, `sik` becomes a pattern that matches `s`, `$`, `5` for the first char, allows separators between chars, and so on.
+Each language has its own char map, leet map, char classes, and optional number expansions. The engine is language-agnostic — only the data is language-specific.
 
-For suffixable roots, the engine appends an optional suffix group (up to 2 chained suffixes from 73 Turkish grammatical suffixes). This means `sik` automatically catches `siktiler`, `sikerim`, `siktirler` without manually listing each variant.
+For suffixable roots, the engine appends an optional suffix group (up to 2 chained suffixes). Turkish has 73 suffixes, English has 6, Spanish has 9, German has 5.
 
-### Dictionary Format
+### Language Packs
 
-The dictionary is a community-friendly JSON file (`src/dictionary/tr.json`) with runtime validation. No TypeScript knowledge needed to contribute:
+Each language lives in its own folder under `src/lang/`:
+
+```
+src/lang/
+  tr/
+    config.ts           ← charMap, leetMap, charClasses, locale
+    dictionary.json     ← entries, suffixes, whitelist
+  en/
+    config.ts
+    dictionary.json
+  ...
+```
+
+Dictionary format (community-friendly JSON, no TypeScript needed):
 
 ```json
 {
-  "root": "sik",
-  "variants": ["siktir", "sikerim", ...],
-  "severity": "high",
-  "category": "sexual",
-  "suffixable": true
+  "version": 1,
+  "suffixes": ["ing", "ed", "er", "s"],
+  "entries": [
+    { "root": "fuck", "variants": ["fucking", "fucker"], "severity": "high", "category": "sexual", "suffixable": true }
+  ],
+  "whitelist": ["assassin", "class", "grass"]
 }
 ```
 
 Categories: `sexual`, `insult`, `slur`, `general`. Severity: `high`, `medium`, `low`.
+
+### Adding a New Language
+
+1. Create `src/lang/xx/` folder
+2. Add `dictionary.json` (entries, suffixes, whitelist)
+3. Add `config.ts` (locale, charMap, leetMap, charClasses)
+4. Register in `src/lang/index.ts` (one import line)
+5. Write tests, build, done
 
 ## Performance
 
@@ -159,6 +186,17 @@ app.post("/chat", (req, res) => {
 });
 ```
 
+```ts
+// Option C: Multi-language warmup
+// Creates and JIT-warms all languages at once.
+const cache = Terlik.warmup(["tr", "en", "es", "de"]);
+
+app.post("/chat", (req, res) => {
+  const lang = req.body.language; // "tr", "en", etc.
+  const cleaned = cache.get(lang)!.clean(req.body.message); // <1ms
+});
+```
+
 > **Important:** Never create `new Terlik()` per request. Each constructor call recompiles all patterns. A single cached instance handles requests in microseconds.
 
 ### Throughput
@@ -173,10 +211,13 @@ Benchmark results (Apple Silicon, single core, msgs/sec):
 | Strict mode | ~390,000 |
 | Loose mode (with fuzzy) | ~8,400 |
 
+> **Note:** Loose/fuzzy mode is ~18x slower than balanced mode due to O(n*m) similarity computation. Use it only when typo tolerance is critical, not as a default.
+
 ## Options
 
 ```ts
 const terlik = new Terlik({
+  language: "tr",                // "tr" | "en" | "es" | "de" (default: "tr")
   mode: "balanced",              // "strict" | "balanced" | "loose"
   maskStyle: "stars",            // "stars" | "partial" | "replace"
   replaceMask: "[***]",          // mask text for "replace" style
@@ -239,21 +280,49 @@ terlik.removeWords(["salak"]);
 terlik.containsProfanity("salak"); // false
 ```
 
-### `normalize(text): string`
+### `Terlik.warmup(languages, options?): Map<string, Terlik>`
 
-Standalone export. Useful if you need the normalization pipeline without detection.
+Static method. Creates and JIT-warms instances for multiple languages at once.
 
 ```ts
-import { normalize } from "terlik.js";
+const cache = Terlik.warmup(["tr", "en", "es", "de"]);
+cache.get("en")!.containsProfanity("fuck"); // true — no cold start
+```
 
-normalize("S.İ.K.T.İ.R"); // "siktir"
-normalize("$1k7!r");       // "siktir"
-normalize("s2mle");         // "sikimle"
+### `terlik.language: string`
+
+Read-only property. Returns the language code of the instance.
+
+### `getSupportedLanguages(): string[]`
+
+Returns all available language codes.
+
+```ts
+import { getSupportedLanguages } from "terlik.js";
+getSupportedLanguages(); // ["tr", "en", "es", "de"]
+```
+
+### `normalize(text): string`
+
+Standalone export. Uses Turkish locale by default.
+
+```ts
+import { normalize, createNormalizer } from "terlik.js";
+
+normalize("S.İ.K.T.İ.R"); // "siktir" (Turkish default)
+
+// Custom normalizer for any language
+const deNormalize = createNormalizer({
+  locale: "de",
+  charMap: { ä: "a", ö: "o", ü: "u", ß: "ss" },
+  leetMap: { "0": "o", "3": "e" },
+});
+deNormalize("Scheiße"); // "scheisse"
 ```
 
 ## Testing
 
-346 tests covering all 25 root words, suffix detection, normalization, fuzzy matching, cleaning, integration, and edge cases:
+548 tests covering all 4 languages, 25 Turkish root words, suffix detection, multi-language isolation, normalization, fuzzy matching, cleaning, integration, and edge cases:
 
 ```bash
 pnpm test          # run once
@@ -270,7 +339,35 @@ pnpm dev:live      # http://localhost:2026
 
 See [`live_test_server/README.md`](./live_test_server/README.md) for details.
 
+## Development
+
+```bash
+pnpm install          # install dependencies
+pnpm test             # run tests
+pnpm test:coverage    # run tests with coverage report
+pnpm typecheck        # TypeScript type checking
+pnpm build            # build ESM + CJS output
+pnpm bench            # run performance benchmarks
+pnpm dev:live         # start interactive test server
+```
+
+Pre-commit hooks (via Husky) automatically run type checking on staged `.ts` files.
+
+See [CONTRIBUTING.md](./CONTRIBUTING.md) for contribution guidelines.
+
 ## Changelog
+
+### 2026-02-28 (v2)
+
+**Multi-Language Support**
+
+- **4 built-in languages** — Turkish (tr), English (en), Spanish (es), German (de). Each language is a self-contained folder (`src/lang/xx/`) with `config.ts` and `dictionary.json`.
+- **Folder-based language packs** — Adding a new language requires creating one folder with two files and one import line in the registry.
+- **`Terlik.warmup()`** — Static method to create and JIT-warm multiple language instances at once for server deployments.
+- **`language` option** — `new Terlik({ language: "en" })`. Default remains `"tr"` (backward compatible).
+- **Language-agnostic engine** — Normalizer, pattern compiler, detector, and cleaner are now fully parametric. Language-specific data (charMap, leetMap, charClasses, numberExpansions) comes from config files.
+- **New exports** — `createNormalizer`, `getLanguageConfig`, `getSupportedLanguages`, `LanguageConfig` type.
+- **Test coverage** — 346 → 418 tests. Added language-specific tests, cross-language isolation tests, and registry tests.
 
 ### 2026-02-28
 

@@ -1,0 +1,156 @@
+{
+  "version": 1,
+  "suffixes": ["ado", "ando", "ido", "iendo", "ar", "er", "ir", "os", "as", "es", "ito", "ita", "azo"],
+  "entries": [
+    {
+      "root": "mierda",
+      "variants": ["mierdas", "mierdo", "mierdero", "mierdoso"],
+      "severity": "high",
+      "category": "general",
+      "suffixable": true
+    },
+    {
+      "root": "puta",
+      "variants": ["putas", "putada", "puto", "putos", "hijoputa", "hijaputa", "putero", "puton", "putear"],
+      "severity": "high",
+      "category": "insult",
+      "suffixable": true
+    },
+    {
+      "root": "cabron",
+      "variants": ["cabrones", "cabrona", "cabronazo", "cabronada"],
+      "severity": "high",
+      "category": "insult",
+      "suffixable": true
+    },
+    {
+      "root": "joder",
+      "variants": ["jodido", "jodida", "jodidos", "jodidas", "joderse", "jodiendo"],
+      "severity": "high",
+      "category": "general",
+      "suffixable": true
+    },
+    {
+      "root": "coño",
+      "variants": ["cono", "conos", "coños"],
+      "severity": "high",
+      "category": "sexual",
+      "suffixable": false
+    },
+    {
+      "root": "verga",
+      "variants": ["vergas", "vergon", "vergudo", "vergota"],
+      "severity": "high",
+      "category": "sexual",
+      "suffixable": true
+    },
+    {
+      "root": "chingar",
+      "variants": ["chingado", "chingada", "chingados", "chinga", "chingas", "chingo", "chingon", "chingona", "chingadera"],
+      "severity": "high",
+      "category": "general",
+      "suffixable": true
+    },
+    {
+      "root": "pendejo",
+      "variants": ["pendejos", "pendeja", "pendejas", "pendejada", "pendejear"],
+      "severity": "high",
+      "category": "insult",
+      "suffixable": true
+    },
+    {
+      "root": "marica",
+      "variants": ["maricas", "maricon", "maricones", "maricona"],
+      "severity": "high",
+      "category": "slur",
+      "suffixable": false
+    },
+    {
+      "root": "carajo",
+      "variants": ["carajos"],
+      "severity": "medium",
+      "category": "general",
+      "suffixable": false
+    },
+    {
+      "root": "idiota",
+      "variants": ["idiotas", "idiotez"],
+      "severity": "low",
+      "category": "insult",
+      "suffixable": false
+    },
+    {
+      "root": "culo",
+      "variants": ["culos", "culazo", "culear"],
+      "severity": "medium",
+      "category": "sexual",
+      "suffixable": true
+    },
+    {
+      "root": "zorra",
+      "variants": ["zorras", "zorron"],
+      "severity": "high",
+      "category": "insult",
+      "suffixable": true
+    },
+    {
+      "root": "estupido",
+      "variants": ["estupidos", "estupida", "estupidas", "estupidez"],
+      "severity": "low",
+      "category": "insult",
+      "suffixable": false
+    },
+    {
+      "root": "imbecil",
+      "variants": ["imbeciles"],
+      "severity": "low",
+      "category": "insult",
+      "suffixable": false
+    },
+    {
+      "root": "gilipollas",
+      "variants": ["gilipolleces", "gilipollez"],
+      "severity": "high",
+      "category": "insult",
+      "suffixable": false
+    },
+    {
+      "root": "huevon",
+      "variants": ["huevones", "huevona", "huevonazo", "guevon"],
+      "severity": "medium",
+      "category": "insult",
+      "suffixable": false
+    },
+    {
+      "root": "mamada",
+      "variants": ["mamadas", "mamazo", "mamon", "mamona", "mamones"],
+      "severity": "medium",
+      "category": "sexual",
+      "suffixable": false
+    },
+    {
+      "root": "pinche",
+      "variants": ["pinches"],
+      "severity": "medium",
+      "category": "general",
+      "suffixable": false
+    }
+  ],
+  "whitelist": [
+    "putamen",
+    "computadora",
+    "computar",
+    "disputar",
+    "disputa",
+    "reputacion",
+    "imputar",
+    "inocular",
+    "acular",
+    "calcular",
+    "icular",
+    "vehicular",
+    "particular",
+    "articulo",
+    "maricopa"
+  ]
+}

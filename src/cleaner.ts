@@ -13,6 +13,13 @@ function maskReplace(replaceMask: string): string {
   return replaceMask;
 }
 
+/**
+ * Applies a mask to a single word using the specified style.
+ * @param word - The word to mask.
+ * @param style - The masking style.
+ * @param replaceMask - The replacement text (used only with "replace" style).
+ * @returns The masked string.
+ */
 export function applyMask(word: string, style: MaskStyle, replaceMask: string): string {
   switch (style) {
     case "stars":
@@ -24,6 +31,16 @@ export function applyMask(word: string, style: MaskStyle, replaceMask: string): 
   }
 }
 
+/**
+ * Replaces all matched profanity in the text with masked versions.
+ * Processes matches from end to start to preserve character indices.
+ *
+ * @param text - The original text.
+ * @param matches - The detected matches to mask.
+ * @param style - The masking style.
+ * @param replaceMask - The replacement text (used only with "replace" style).
+ * @returns The cleaned text.
+ */
 export function cleanText(
   text: string,
   matches: MatchResult[],

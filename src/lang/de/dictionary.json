@@ -1,0 +1,137 @@
+{
+  "version": 1,
+  "suffixes": ["en", "er", "es", "em", "ung", "e", "te", "st"],
+  "entries": [
+    {
+      "root": "scheiße",
+      "variants": ["scheisse", "scheiss", "scheisser", "scheisserei", "beschissen"],
+      "severity": "high",
+      "category": "general",
+      "suffixable": true
+    },
+    {
+      "root": "fick",
+      "variants": ["ficken", "ficker", "gefickt", "fickend", "fickerei", "abgefickt"],
+      "severity": "high",
+      "category": "sexual",
+      "suffixable": true
+    },
+    {
+      "root": "arsch",
+      "variants": ["arschloch", "arscher", "arschgeige", "arschgesicht", "arschkriecher"],
+      "severity": "high",
+      "category": "insult",
+      "suffixable": true
+    },
+    {
+      "root": "hurensohn",
+      "variants": ["hurensohne", "hurensöhne"],
+      "severity": "high",
+      "category": "insult",
+      "suffixable": false
+    },
+    {
+      "root": "hure",
+      "variants": ["huren", "hurig"],
+      "severity": "high",
+      "category": "insult",
+      "suffixable": true
+    },
+    {
+      "root": "fotze",
+      "variants": ["fotzen"],
+      "severity": "high",
+      "category": "sexual",
+      "suffixable": true
+    },
+    {
+      "root": "wichser",
+      "variants": ["wichsern", "wichse", "wichsen", "gewichst"],
+      "severity": "high",
+      "category": "sexual",
+      "suffixable": false
+    },
+    {
+      "root": "schwanz",
+      "variants": ["schwänze", "schwanze"],
+      "severity": "medium",
+      "category": "sexual",
+      "suffixable": false
+    },
+    {
+      "root": "schlampe",
+      "variants": ["schlampen", "schlampig"],
+      "severity": "high",
+      "category": "insult",
+      "suffixable": true
+    },
+    {
+      "root": "mistkerl",
+      "variants": ["mistkerle"],
+      "severity": "medium",
+      "category": "insult",
+      "suffixable": false
+    },
+    {
+      "root": "idiot",
+      "variants": ["idioten", "idiotin", "idiotisch"],
+      "severity": "low",
+      "category": "insult",
+      "suffixable": true
+    },
+    {
+      "root": "dumm",
+      "variants": ["dummkopf", "dumme", "dummer", "dummes", "dummheit"],
+      "severity": "low",
+      "category": "insult",
+      "suffixable": true
+    },
+    {
+      "root": "depp",
+      "variants": ["deppen", "deppert"],
+      "severity": "low",
+      "category": "insult",
+      "suffixable": true
+    },
+    {
+      "root": "vollidiot",
+      "variants": ["vollidioten"],
+      "severity": "medium",
+      "category": "insult",
+      "suffixable": false
+    },
+    {
+      "root": "missgeburt",
+      "variants": ["missgeburten"],
+      "severity": "high",
+      "category": "insult",
+      "suffixable": false
+    },
+    {
+      "root": "drecksau",
+      "variants": ["drecksäue"],
+      "severity": "high",
+      "category": "insult",
+      "suffixable": false
+    },
+    {
+      "root": "dreck",
+      "variants": ["dreckig", "dreckiger", "dreckiges"],
+      "severity": "medium",
+      "category": "general",
+      "suffixable": true
+    },
+    {
+      "root": "trottel",
+      "variants": ["trotteln", "trottelig"],
+      "severity": "low",
+      "category": "insult",
+      "suffixable": false
+    }
+  ],
+  "whitelist": [
+    "ficktion",
+    "arschen",
+    "schwanzen"
+  ]
+}
