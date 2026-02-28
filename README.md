@@ -4,13 +4,14 @@
 
 [![CI](https://github.com/badursun/terlik.js/actions/workflows/ci.yml/badge.svg)](https://github.com/badursun/terlik.js/actions/workflows/ci.yml)
 [![npm version](https://img.shields.io/npm/v/terlik.js.svg)](https://www.npmjs.com/package/terlik.js)
+[![npm bundle size](https://img.shields.io/bundlephobia/minzip/terlik.js)](https://bundlephobia.com/package/terlik.js)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 Production-grade multi-language profanity detection and filtering. Not a naive blacklist — a multi-layered normalization and pattern engine that catches what simple string matching misses.
 
 Built-in support for **Turkish**, **English**, **Spanish**, and **German**. Adding a new language is just a folder with two files.
 
-Zero runtime dependencies. Full TypeScript. ESM + CJS. Works in Node.js, Bun, Deno, browsers, Cloudflare Workers, and Edge runtimes — no Node.js-specific APIs used.
+Zero runtime dependencies. Full TypeScript. ESM + CJS. **35 KB** gzipped. Works in Node.js, Bun, Deno, browsers, Cloudflare Workers, and Edge runtimes — no Node.js-specific APIs used.
 
 ## Why terlik.js?
 
