@@ -187,6 +187,8 @@ terlik.js ships with a **deliberately narrow dictionary** — the goal is to **m
 
 A large dictionary maximizes recall but tanks precision. In production chat systems, **false positives are worse than false negatives** — blocking "class" or "grass" because the dictionary is too broad erodes user trust. terlik.js defaults to high precision and lets you widen coverage per your needs:
 
+> **The `sık`/`sik` paradox:** Turkish `sık` (frequent/tight) normalizes to `sik` because `ı→i` char folding is required to catch evasions like `s1kt1r`. Making `sik` suffix-aware would flag `sıkıntı` (trouble), `sıkma` (squeeze), `sıkı` (tight) — extremely common words. Instead, deep agglutination forms like `siktiğimin` and `sikermisiniz` are added as explicit variants. This is a deliberate precision-over-recall tradeoff.
+
 ```ts
 // Add domain-specific words
 terlik.addWords(["customSlang", "anotherWord"]);
