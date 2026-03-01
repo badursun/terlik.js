@@ -24,6 +24,16 @@ describe("Spanish profanity detection", () => {
       { word: "gilipollas", text: "menudo gilipollas" },
       { word: "huevon", text: "que huevon" },
       { word: "pinche", text: "pinche idiota" },
+      { word: "culero", text: "eres culero" },
+      { word: "cojones", text: "tiene cojones" },
+      { word: "polla", text: "menuda polla" },
+      { word: "follar", text: "vamos a follar" },
+      { word: "capullo", text: "eres un capullo" },
+      { word: "guarro", text: "que guarro" },
+      { word: "boludo", text: "sos un boludo" },
+      { word: "pelotudo", text: "que pelotudo" },
+      { word: "hostia", text: "hostia tio" },
+      { word: "soplapollas", text: "menudo soplapollas" },
     ];
 
     for (const { word, text } of roots) {
@@ -35,14 +45,24 @@ describe("Spanish profanity detection", () => {
 
   describe("variant detection", () => {
     const variants = [
-      "puto", "putas", "hijoputa", "putear",
+      "puto", "putas", "hijoputa", "putear", "putazo", "puteada",
       "jodido", "jodida", "jodiendo",
-      "chingado", "chingada", "chingon", "chingona", "chingadera",
+      "chingado", "chingada", "chingon", "chingona", "chingadera", "chingue",
       "pendejos", "pendeja", "pendejada",
       "maricon", "maricones",
       "cabrones", "cabrona", "cabronazo",
       "mierdoso",
       "estupida", "estupidez",
+      "coñazo",
+      "culeros", "culera",
+      "cojonudo",
+      "pollas", "pollon",
+      "follando", "follado", "follada",
+      "capullos",
+      "guarros", "guarra", "guarrada",
+      "boludos", "boluda", "boludez",
+      "pelotudos", "pelotuda", "pelotudez",
+      "mamonazo",
     ];
 
     for (const v of variants) {
@@ -70,6 +90,8 @@ describe("Spanish profanity detection", () => {
     const safeWords = [
       "computadora", "disputar", "reputacion", "calcular",
       "particular", "vehicular",
+      "pollo", "pollito", "polleria", "polluelo",
+      "folleto", "follaje",
     ];
 
     for (const word of safeWords) {

@@ -4,21 +4,21 @@
   "entries": [
     {
       "root": "scheiße",
-      "variants": ["scheisse", "scheiss", "scheisser", "scheisserei", "beschissen"],
+      "variants": ["scheisse", "scheiss", "scheisser", "scheisserei", "beschissen", "scheissegal"],
       "severity": "high",
       "category": "general",
       "suffixable": true
     },
     {
       "root": "fick",
-      "variants": ["ficken", "ficker", "gefickt", "fickend", "fickerei", "abgefickt"],
+      "variants": ["ficken", "ficker", "gefickt", "fickend", "fickerei", "abgefickt", "verfickt", "fickfehler"],
       "severity": "high",
       "category": "sexual",
       "suffixable": true
     },
     {
       "root": "arsch",
-      "variants": ["arschloch", "arscher", "arschgeige", "arschgesicht", "arschkriecher"],
+      "variants": ["arschloch", "arscher", "arschgeige", "arschgesicht", "arschkriecher", "arschbacke", "arschlöcher", "arschlocher"],
       "severity": "high",
       "category": "insult",
       "suffixable": true
@@ -46,7 +46,7 @@
     },
     {
       "root": "wichser",
-      "variants": ["wichsern", "wichse", "wichsen", "gewichst"],
+      "variants": ["wichsern", "wichse", "wichsen", "gewichst", "wixer"],
       "severity": "high",
       "category": "sexual",
       "suffixable": false
@@ -60,7 +60,7 @@
     },
     {
       "root": "schlampe",
-      "variants": ["schlampen", "schlampig"],
+      "variants": ["schlampen", "schlampig", "schlamperei"],
       "severity": "high",
       "category": "insult",
       "suffixable": true
@@ -116,7 +116,7 @@
     },
     {
       "root": "dreck",
-      "variants": ["dreckig", "dreckiger", "dreckiges"],
+      "variants": ["dreckig", "dreckiger", "dreckiges", "drecksack", "dreckstück", "dreckstuck"],
       "severity": "medium",
       "category": "general",
       "suffixable": true
@@ -127,11 +127,84 @@
       "severity": "low",
       "category": "insult",
       "suffixable": false
+    },
+    {
+      "root": "schwuchtel",
+      "variants": ["schwuchteln"],
+      "severity": "high",
+      "category": "slur",
+      "suffixable": false
+    },
+    {
+      "root": "spast",
+      "variants": ["spasten", "spasti"],
+      "severity": "high",
+      "category": "slur",
+      "suffixable": false
+    },
+    {
+      "root": "miststück",
+      "variants": ["miststueck"],
+      "severity": "medium",
+      "category": "insult",
+      "suffixable": false
+    },
+    {
+      "root": "bastard",
+      "variants": ["bastarde"],
+      "severity": "medium",
+      "category": "insult",
+      "suffixable": false
+    },
+    {
+      "root": "penner",
+      "variants": ["penners"],
+      "severity": "low",
+      "category": "insult",
+      "suffixable": false
+    },
+    {
+      "root": "blödmann",
+      "variants": ["blodmann", "blödmänner"],
+      "severity": "low",
+      "category": "insult",
+      "suffixable": false
+    },
+    {
+      "root": "vollpfosten",
+      "variants": [],
+      "severity": "medium",
+      "category": "insult",
+      "suffixable": false
+    },
+    {
+      "root": "hackfresse",
+      "variants": [],
+      "severity": "high",
+      "category": "insult",
+      "suffixable": false
+    },
+    {
+      "root": "pissnelke",
+      "variants": [],
+      "severity": "medium",
+      "category": "insult",
+      "suffixable": false
+    },
+    {
+      "root": "spacken",
+      "variants": [],
+      "severity": "low",
+      "category": "insult",
+      "suffixable": false
     }
   ],
   "whitelist": [
     "ficktion",
     "arschen",
-    "schwanzen"
+    "schwanzen",
+    "schwanger",
+    "schwangerschaft",
+    "geschichte"
   ]
 }

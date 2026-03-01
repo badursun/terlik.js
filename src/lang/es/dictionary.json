@@ -11,7 +11,7 @@
     },
     {
       "root": "puta",
-      "variants": ["putas", "putada", "puto", "putos", "hijoputa", "hijaputa", "putero", "puton", "putear"],
+      "variants": ["putas", "putada", "puto", "putos", "hijoputa", "hijaputa", "putero", "puton", "putear", "putazo", "puteada"],
       "severity": "high",
       "category": "insult",
       "suffixable": true
@@ -32,7 +32,7 @@
     },
     {
       "root": "coño",
-      "variants": ["cono", "conos", "coños"],
+      "variants": ["cono", "conos", "coños", "coñazo"],
       "severity": "high",
       "category": "sexual",
       "suffixable": false
@@ -46,7 +46,7 @@
     },
     {
       "root": "chingar",
-      "variants": ["chingado", "chingada", "chingados", "chinga", "chingas", "chingo", "chingon", "chingona", "chingadera"],
+      "variants": ["chingado", "chingada", "chingados", "chinga", "chingas", "chingo", "chingon", "chingona", "chingadera", "chingue", "chingues"],
       "severity": "high",
       "category": "general",
       "suffixable": true
@@ -123,7 +123,7 @@
     },
     {
       "root": "mamada",
-      "variants": ["mamadas", "mamazo", "mamon", "mamona", "mamones"],
+      "variants": ["mamadas", "mamazo", "mamon", "mamona", "mamones", "mamonazo"],
       "severity": "medium",
       "category": "sexual",
       "suffixable": false
@@ -133,6 +133,76 @@
       "variants": ["pinches"],
       "severity": "medium",
       "category": "general",
+      "suffixable": false
+    },
+    {
+      "root": "culero",
+      "variants": ["culeros", "culera", "culeras"],
+      "severity": "medium",
+      "category": "insult",
+      "suffixable": false
+    },
+    {
+      "root": "cojones",
+      "variants": ["cojon", "cojonudo"],
+      "severity": "medium",
+      "category": "sexual",
+      "suffixable": false
+    },
+    {
+      "root": "polla",
+      "variants": ["pollas", "pollon"],
+      "severity": "high",
+      "category": "sexual",
+      "suffixable": false
+    },
+    {
+      "root": "follar",
+      "variants": ["follando", "follado", "follada"],
+      "severity": "high",
+      "category": "sexual",
+      "suffixable": true
+    },
+    {
+      "root": "capullo",
+      "variants": ["capullos"],
+      "severity": "medium",
+      "category": "insult",
+      "suffixable": false
+    },
+    {
+      "root": "guarro",
+      "variants": ["guarros", "guarra", "guarras", "guarrada"],
+      "severity": "medium",
+      "category": "insult",
+      "suffixable": true
+    },
+    {
+      "root": "boludo",
+      "variants": ["boludos", "boluda", "boludez"],
+      "severity": "medium",
+      "category": "insult",
+      "suffixable": false
+    },
+    {
+      "root": "pelotudo",
+      "variants": ["pelotudos", "pelotuda", "pelotudez"],
+      "severity": "medium",
+      "category": "insult",
+      "suffixable": false
+    },
+    {
+      "root": "hostia",
+      "variants": ["hostias"],
+      "severity": "medium",
+      "category": "general",
+      "suffixable": false
+    },
+    {
+      "root": "soplapollas",
+      "variants": [],
+      "severity": "high",
+      "category": "insult",
       "suffixable": false
     }
   ],
@@ -151,6 +221,12 @@
     "vehicular",
     "particular",
     "articulo",
-    "maricopa"
+    "maricopa",
+    "pollo",
+    "pollito",
+    "polleria",
+    "polluelo",
+    "folleto",
+    "follaje"
   ]
 }
