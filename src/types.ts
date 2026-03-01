@@ -51,6 +51,8 @@ export interface TerlikOptions {
   replaceMask?: string;
   /** Background'da regex derleme + JIT warmup. Default: false. Serverless'da önerilmez. */
   backgroundWarmup?: boolean;
+  /** External dictionary data to merge with the built-in language dictionary. */
+  extendDictionary?: import("./dictionary/schema.js").DictionaryData;
 }
 
 /** Per-call detection options that override instance defaults. */

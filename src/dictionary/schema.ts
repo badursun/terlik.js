@@ -121,3 +121,34 @@ export function validateDictionary(data: unknown): DictionaryData {
 
   return data as DictionaryData;
 }
+
+/**
+ * Merges an extension dictionary into a base dictionary.
+ * Duplicate roots (by lowercase comparison) in the extension are skipped.
+ * Suffixes and whitelist entries are unioned via Set.
+ *
+ * @param base - The base (built-in) dictionary data.
+ * @param ext - The extension dictionary data to merge in.
+ * @returns A new merged DictionaryData object.
+ */
+export function mergeDictionaries(base: DictionaryData, ext: DictionaryData): DictionaryData {
+  const existingRoots = new Set(base.entries.map((e) => e.root.toLowerCase()));
+
+  const mergedEntries = [...base.entries];
+  for (const entry of ext.entries) {
+    if (!existingRoots.has(entry.root.toLowerCase())) {
+      mergedEntries.push(entry);
+      existingRoots.add(entry.root.toLowerCase());
+    }
+  }
+
+  const mergedSuffixes = [...new Set([...base.suffixes, ...ext.suffixes])];
+  const mergedWhitelist = [...new Set([...base.whitelist, ...ext.whitelist])];
+
+  return {
+    version: base.version,
+    suffixes: mergedSuffixes,
+    entries: mergedEntries,
+    whitelist: mergedWhitelist,
+  };
+}

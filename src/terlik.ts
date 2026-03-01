@@ -14,6 +14,7 @@ import { cleanText } from "./cleaner.js";
 import { validateInput, MAX_INPUT_LENGTH } from "./utils.js";
 import { getLanguageConfig } from "./lang/index.js";
 import { createNormalizer } from "./normalizer.js";
+import { validateDictionary, mergeDictionaries } from "./dictionary/schema.js";
 
 /**
  * Multi-language profanity detection and filtering engine.
@@ -71,12 +72,18 @@ export class Terlik {
       numberExpansions: langConfig.numberExpansions,
     });
 
+    let dictData = langConfig.dictionary;
+    if (options?.extendDictionary) {
+      validateDictionary(options.extendDictionary);
+      dictData = mergeDictionaries(dictData, options.extendDictionary);
+    }
+
     this.dictionary = new Dictionary(
-      langConfig.dictionary,
+      dictData,
       options?.customList,
       options?.whitelist,
     );
-    const hasCustomDict = !!(options?.customList?.length || options?.whitelist?.length);
+    const hasCustomDict = !!(options?.customList?.length || options?.whitelist?.length || options?.extendDictionary);
     this.detector = new Detector(
       this.dictionary,
       normalizeFn,

@@ -7,9 +7,9 @@
 [![npm bundle size](https://img.shields.io/bundlephobia/minzip/terlik.js)](https://bundlephobia.com/package/terlik.js)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-Production-grade multi-language profanity detection and filtering. Not a naive blacklist — a multi-layered normalization and pattern engine that catches what simple string matching misses.
+Turkish-first multi-language profanity detection and filtering. Not a naive blacklist — a multi-layered normalization and pattern engine that catches what simple string matching misses.
 
-Built-in support for **Turkish**, **English**, **Spanish**, and **German**. Adding a new language is just a folder with two files.
+**Turkish** is the flagship language with full coverage. **English**, **Spanish**, and **German** are community-maintained and open for contributions. Adding a new language is just a folder with two files.
 
 Zero runtime dependencies. Full TypeScript. ESM + CJS. **35 KB** gzipped. Works in Node.js, Bun, Deno, browsers, Cloudflare Workers, and Edge runtimes — no Node.js-specific APIs used.
 
@@ -119,6 +119,8 @@ For suffixable roots, the engine appends an optional suffix group (up to 2 chain
 
 ### Language Packs
 
+Community contributions to existing language packs (new words, variants, whitelist entries) and entirely new language packs are welcome! See [CONTRIBUTING.md](./CONTRIBUTING.md) for step-by-step instructions.
+
 Each language lives in its own folder under `src/lang/`:
 
 ```
@@ -161,12 +163,12 @@ terlik.js ships with a **deliberately narrow dictionary** — the goal is to **m
 
 ### Coverage
 
-| Language | Roots | Explicit Variants | Suffixes | Whitelist | Effective Forms |
-|---|---|---|---|---|---|
-| Turkish | 25 | 88 | 83 | 52 | ~3,000+ |
-| English | 23 | 106 | 8 | 42 | ~700+ |
-| Spanish | 19 | 73 | 13 | 15 | ~500+ |
-| German | 18 | 48 | 8 | 3 | ~300+ |
+| Language | Status | Roots | Explicit Variants | Suffixes | Whitelist | Effective Forms |
+|---|---|---|---|---|---|---|
+| Turkish | Flagship | 25 | 88 | 83 | 52 | ~3,000+ |
+| English | Community | 23 | 106 | 8 | 42 | ~700+ |
+| Spanish | Community | 19 | 73 | 13 | 15 | ~500+ |
+| German | Community | 18 | 48 | 8 | 3 | ~300+ |
 
 "Effective forms" = roots × normalization variants × suffix combinations × evasion patterns. A root like `sik` with 83 possible suffixes, leet decoding, separator tolerance, and repeat collapse produces thousands of detectable surface forms.
 
@@ -317,6 +319,7 @@ const terlik = new Terlik({
   fuzzyAlgorithm: "levenshtein", // "levenshtein" | "dice"
   maxLength: 10000,              // truncate input beyond this
   backgroundWarmup: false,       // compile patterns in background via setTimeout
+  extendDictionary: undefined,   // DictionaryData object to merge with built-in dictionary
 });
 ```
 
@@ -379,6 +382,30 @@ const cache = Terlik.warmup(["tr", "en", "es", "de"]);
 cache.get("en")!.containsProfanity("fuck"); // true — no cold start
 ```
 
+### `extendDictionary` Option
+
+Merge an external dictionary with the built-in one. Useful for teams managing custom word lists without modifying the core package:
+
+```ts
+const terlik = new Terlik({
+  extendDictionary: {
+    version: 1,
+    suffixes: ["ci", "cu"],
+    entries: [
+      { root: "customword", variants: ["cust0mword"], severity: "high", category: "general", suffixable: true },
+    ],
+    whitelist: ["safeterm"],
+  },
+});
+
+terlik.containsProfanity("customword");    // true
+terlik.containsProfanity("customwordci");  // true (suffix match)
+terlik.containsProfanity("safeterm");      // false (whitelisted)
+terlik.containsProfanity("siktir");        // true (built-in still works)
+```
+
+The extension dictionary must follow the same schema as built-in dictionaries. Duplicate roots are skipped; suffixes and whitelist entries are merged. Pattern cache is disabled for extended instances.
+
 ### `terlik.language: string`
 
 Read-only property. Returns the language code of the instance.
@@ -412,7 +439,7 @@ deNormalize("Scheiße"); // "scheisse"
 
 ## Testing
 
-631 tests covering all 4 languages, 25 Turkish root words, suffix detection, lazy compilation, multi-language isolation, normalization, fuzzy matching, cleaning, integration, ReDoS hardening, attack surface coverage, and edge cases:
+874 tests covering all 4 languages, 25 Turkish root words, suffix detection, lazy compilation, multi-language isolation, normalization, fuzzy matching, cleaning, integration, ReDoS hardening, attack surface coverage, external dictionary merging, and edge cases:
 
 ```bash
 pnpm test          # run once
