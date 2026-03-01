@@ -52,6 +52,59 @@ describe("edge cases", () => {
     it("does not flag 'dolmen'", () => {
       expect(terlik.containsProfanity("dolmen antik yapi")).toBe(false);
     });
+
+    // New whitelist entries
+    it("does not flag 'amazon'", () => {
+      expect(terlik.containsProfanity("amazon siparis verdim")).toBe(false);
+    });
+
+    it("does not flag 'ambargo'", () => {
+      expect(terlik.containsProfanity("ambargo uygulandi")).toBe(false);
+    });
+
+    it("does not flag 'amblem'", () => {
+      expect(terlik.containsProfanity("amblem tasarimi")).toBe(false);
+    });
+
+    it("does not flag 'amfibi'", () => {
+      expect(terlik.containsProfanity("amfibi arac")).toBe(false);
+    });
+
+    it("does not flag 'dolap'", () => {
+      expect(terlik.containsProfanity("dolap kapagi")).toBe(false);
+    });
+
+    it("does not flag 'dolar'", () => {
+      expect(terlik.containsProfanity("dolar kuru yukseldi")).toBe(false);
+    });
+
+    it("does not flag 'dolma'", () => {
+      expect(terlik.containsProfanity("dolma yaprak sardim")).toBe(false);
+    });
+
+    it("does not flag 'dolmus'", () => {
+      expect(terlik.containsProfanity("dolmus bekliyorum")).toBe(false);
+    });
+
+    it("does not flag 'malum'", () => {
+      expect(terlik.containsProfanity("malum kisi")).toBe(false);
+    });
+
+    it("does not flag 'namus'", () => {
+      expect(terlik.containsProfanity("namus meselesi")).toBe(false);
+    });
+
+    it("does not flag 'namuslu'", () => {
+      expect(terlik.containsProfanity("namuslu adam")).toBe(false);
+    });
+
+    it("does not flag 'ahlak'", () => {
+      expect(terlik.containsProfanity("ahlak dersi")).toBe(false);
+    });
+
+    it("does not flag 'ahlaki'", () => {
+      expect(terlik.containsProfanity("ahlaki degerler")).toBe(false);
+    });
   });
 
   describe("emoji handling", () => {
@@ -152,6 +205,48 @@ describe("edge cases", () => {
 
     it("detects s_i_k_t_i_r", () => {
       expect(terlik.containsProfanity("s_i_k_t_i_r")).toBe(true);
+    });
+  });
+
+  describe("new variant detection", () => {
+    it("detects aminakoyayim (amk variant)", () => {
+      expect(terlik.containsProfanity("aminakoyayim")).toBe(true);
+    });
+
+    it("detects aminakoydum (amk variant)", () => {
+      expect(terlik.containsProfanity("aminakoydum")).toBe(true);
+    });
+
+    it("detects aminakoydugumun (amk variant)", () => {
+      expect(terlik.containsProfanity("aminakoydugumun")).toBe(true);
+    });
+
+    it("detects aq (amk abbreviation)", () => {
+      expect(terlik.containsProfanity("bu ne aq")).toBe(true);
+    });
+
+    it("detects orospucocuklari (orospu variant)", () => {
+      expect(terlik.containsProfanity("orospucocuklari")).toBe(true);
+    });
+
+    it("detects gotos (göt variant)", () => {
+      expect(terlik.containsProfanity("gotos herif")).toBe(true);
+    });
+
+    it("detects yarrani (yarrak variant)", () => {
+      expect(terlik.containsProfanity("yarrani ye")).toBe(true);
+    });
+
+    it("detects yarragimi (yarrak variant)", () => {
+      expect(terlik.containsProfanity("yarragimi")).toBe(true);
+    });
+
+    it("detects yarragini (yarrak variant)", () => {
+      expect(terlik.containsProfanity("yarragini")).toBe(true);
+    });
+
+    it("detects sktr (sik abbreviation)", () => {
+      expect(terlik.containsProfanity("sktr lan")).toBe(true);
     });
   });
 

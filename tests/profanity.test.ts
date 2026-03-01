@@ -358,3 +358,167 @@ describe("root: kahpe", () => {
   it("suffix: kahpelikler", () => detects("kahpelikler", "kahpe"));
   it("uppercase", () => detects("KAHPE", "kahpe"));
 });
+
+// ──────────────────────────────────────────────
+// 26. sürtük (insult, high, suffixable)
+// ──────────────────────────────────────────────
+describe("root: sürtük", () => {
+  it("plain: sürtük", () => detects("sürtük", "sürtük"));
+  it("normalized: surtuk", () => detects("surtuk", "sürtük"));
+  it("in sentence", () => detects("bu kadin surtuk", "sürtük"));
+  it("suffix: surtukler", () => detects("surtukler", "sürtük"));
+  it("suffix: surtukluk", () => detects("surtukluk", "sürtük"));
+  it("uppercase", () => detects("SÜRTÜK", "sürtük"));
+});
+
+// ──────────────────────────────────────────────
+// 27. kaltak (insult, high, suffixable)
+// ──────────────────────────────────────────────
+describe("root: kaltak", () => {
+  it("plain: kaltak", () => detects("kaltak", "kaltak"));
+  it("in sentence", () => detects("bu kaltak kim", "kaltak"));
+  it("suffix: kaltaklar", () => detects("kaltaklar", "kaltak"));
+  it("suffix: kaltaklik", () => detects("kaltaklik", "kaltak"));
+  it("uppercase", () => detects("KALTAK", "kaltak"));
+});
+
+// ──────────────────────────────────────────────
+// 28. fahişe (insult, high, suffixable)
+// ──────────────────────────────────────────────
+describe("root: fahişe", () => {
+  it("plain: fahişe", () => detects("fahişe", "fahişe"));
+  it("normalized: fahise", () => detects("fahise", "fahişe"));
+  it("in sentence", () => detects("bu fahise kadin", "fahişe"));
+  it("suffix: fahiseler", () => detects("fahiseler", "fahişe"));
+  it("suffix: fahiselik", () => detects("fahiselik", "fahişe"));
+  it("uppercase", () => detects("FAHISE", "fahişe"));
+});
+
+// ──────────────────────────────────────────────
+// 29. kevaşe (insult, medium, suffixable)
+// ──────────────────────────────────────────────
+describe("root: kevaşe", () => {
+  it("plain: kevaşe", () => detects("kevaşe", "kevaşe"));
+  it("normalized: kevase", () => detects("kevase", "kevaşe"));
+  it("in sentence", () => detects("bu kevase kim", "kevaşe"));
+  it("suffix: kevaseler", () => detects("kevaseler", "kevaşe"));
+  it("uppercase", () => detects("KEVASE", "kevaşe"));
+});
+
+// ──────────────────────────────────────────────
+// 30. oğlancı (slur, high, suffixable)
+// ──────────────────────────────────────────────
+describe("root: oğlancı", () => {
+  it("plain: oğlancı", () => detects("oğlancı", "oğlancı"));
+  it("normalized: oglanci", () => detects("oglanci", "oğlancı"));
+  it("in sentence", () => detects("bu adam oglanci", "oğlancı"));
+  it("suffix: oglancilar", () => detects("oglancilar", "oğlancı"));
+  it("suffix: oglancilik", () => detects("oglancilik", "oğlancı"));
+  it("uppercase", () => detects("OGLANCI", "oğlancı"));
+});
+
+// ──────────────────────────────────────────────
+// 31. dingil (insult, low, suffixable)
+// ──────────────────────────────────────────────
+describe("root: dingil", () => {
+  it("plain: dingil", () => detects("dingil", "dingil"));
+  it("in sentence", () => detects("bu dingil ne yapiyor", "dingil"));
+  it("suffix: dingiller", () => detects("dingiller", "dingil"));
+  it("suffix: dingillik", () => detects("dingillik", "dingil"));
+  it("uppercase", () => detects("DINGIL", "dingil"));
+});
+
+// ──────────────────────────────────────────────
+// 32. avanak (insult, low, suffixable)
+// ──────────────────────────────────────────────
+describe("root: avanak", () => {
+  it("plain: avanak", () => detects("avanak", "avanak"));
+  it("in sentence", () => detects("bu avanak herif", "avanak"));
+  it("suffix: avanaklar", () => detects("avanaklar", "avanak"));
+  it("suffix: avanaklik", () => detects("avanaklik", "avanak"));
+  it("uppercase", () => detects("AVANAK", "avanak"));
+});
+
+// ──────────────────────────────────────────────
+// 33. manyak (insult, low, suffixable)
+// ──────────────────────────────────────────────
+describe("root: manyak", () => {
+  it("plain: manyak", () => detects("manyak", "manyak"));
+  it("in sentence", () => detects("bu adam manyak", "manyak"));
+  it("suffix: manyaklar", () => detects("manyaklar", "manyak"));
+  it("suffix: manyaklik", () => detects("manyaklik", "manyak"));
+  it("uppercase", () => detects("MANYAK", "manyak"));
+});
+
+// ──────────────────────────────────────────────
+// 34. hödük (insult, low, suffixable)
+// ──────────────────────────────────────────────
+describe("root: hödük", () => {
+  it("plain: hödük", () => detects("hödük", "hödük"));
+  it("normalized: hoduk", () => detects("hoduk", "hödük"));
+  it("in sentence", () => detects("bu hoduk herif", "hödük"));
+  it("suffix: hodukler", () => detects("hodukler", "hödük"));
+  it("suffix: hodukluk", () => detects("hodukluk", "hödük"));
+  it("uppercase", () => detects("HODUK", "hödük"));
+});
+
+// ──────────────────────────────────────────────
+// 35. kepaze (insult, medium, suffixable)
+// ──────────────────────────────────────────────
+describe("root: kepaze", () => {
+  it("plain: kepaze", () => detects("kepaze", "kepaze"));
+  it("in sentence", () => detects("bu adam kepaze", "kepaze"));
+  it("suffix: kepazeler", () => detects("kepazeler", "kepaze"));
+  it("suffix: kepazelik", () => detects("kepazelik", "kepaze"));
+  it("uppercase", () => detects("KEPAZE", "kepaze"));
+});
+
+// ──────────────────────────────────────────────
+// 36. rezil (insult, medium, suffixable)
+// ──────────────────────────────────────────────
+describe("root: rezil", () => {
+  it("plain: rezil", () => detects("rezil", "rezil"));
+  it("in sentence", () => detects("rezil oldu", "rezil"));
+  it("suffix: reziller", () => detects("reziller", "rezil"));
+  it("suffix: rezillik", () => detects("rezillik", "rezil"));
+  it("uppercase", () => detects("REZIL", "rezil"));
+});
+
+// ──────────────────────────────────────────────
+// 37. kalleş (insult, medium, suffixable)
+// ──────────────────────────────────────────────
+describe("root: kalleş", () => {
+  it("plain: kalleş", () => detects("kalleş", "kalleş"));
+  it("normalized: kalles", () => detects("kalles", "kalleş"));
+  it("in sentence", () => detects("bu kalles herif", "kalleş"));
+  it("suffix: kallesler", () => detects("kallesler", "kalleş"));
+  it("suffix: kalleslik", () => detects("kalleslik", "kalleş"));
+  it("uppercase", () => detects("KALLES", "kalleş"));
+});
+
+// ──────────────────────────────────────────────
+// 38. namussuz (insult, medium, suffixable)
+// ──────────────────────────────────────────────
+describe("root: namussuz", () => {
+  it("plain: namussuz", () => detects("namussuz", "namussuz"));
+  it("in sentence", () => detects("bu namussuz adam", "namussuz"));
+  it("suffix: namussuzlar", () => detects("namussuzlar", "namussuz"));
+  it("suffix: namussuzluk", () => detects("namussuzluk", "namussuz"));
+  it("uppercase", () => detects("NAMUSSUZ", "namussuz"));
+  it("whitelist: namus", () => clean("namus"));
+  it("whitelist: namuslu", () => clean("namuslu"));
+});
+
+// ──────────────────────────────────────────────
+// 39. ahlaksız (insult, medium, suffixable)
+// ──────────────────────────────────────────────
+describe("root: ahlaksız", () => {
+  it("plain: ahlaksız", () => detects("ahlaksız", "ahlaksız"));
+  it("normalized: ahlaksiz", () => detects("ahlaksiz", "ahlaksız"));
+  it("in sentence", () => detects("bu ahlaksiz adam", "ahlaksız"));
+  it("suffix: ahlaksizlar", () => detects("ahlaksizlar", "ahlaksız"));
+  it("suffix: ahlaksizlik", () => detects("ahlaksizlik", "ahlaksız"));
+  it("uppercase", () => detects("AHLAKSIZ", "ahlaksız"));
+  it("whitelist: ahlak", () => clean("ahlak"));
+  it("whitelist: ahlaki", () => clean("ahlaki"));
+});
