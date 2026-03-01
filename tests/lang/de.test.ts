@@ -24,6 +24,16 @@ describe("German profanity detection", () => {
       { word: "drecksau", text: "du drecksau" },
       { word: "dreck", text: "so ein dreck" },
       { word: "trottel", text: "du trottel" },
+      { word: "schwuchtel", text: "du schwuchtel" },
+      { word: "spast", text: "du spast" },
+      { word: "miststück", text: "du miststück" },
+      { word: "bastard", text: "du bastard" },
+      { word: "penner", text: "du penner" },
+      { word: "blödmann", text: "du blödmann" },
+      { word: "vollpfosten", text: "so ein vollpfosten" },
+      { word: "hackfresse", text: "du hackfresse" },
+      { word: "pissnelke", text: "du pissnelke" },
+      { word: "spacken", text: "du spacken" },
     ];
 
     for (const { word, text } of roots) {
@@ -35,15 +45,20 @@ describe("German profanity detection", () => {
 
   describe("variant detection", () => {
     const variants = [
-      "scheisse", "scheiss", "beschissen",
-      "ficken", "ficker", "gefickt",
-      "arschloch", "arschgeige", "arschgesicht",
+      "scheisse", "scheiss", "beschissen", "scheissegal",
+      "ficken", "ficker", "gefickt", "verfickt", "fickfehler",
+      "arschloch", "arschgeige", "arschgesicht", "arschbacke", "arschlocher",
       "fotzen",
-      "wichsen", "gewichst",
-      "schlampig",
+      "wichsen", "gewichst", "wixer",
+      "schlampig", "schlamperei",
       "dummkopf", "dummheit",
-      "dreckig",
+      "dreckig", "drecksack",
       "vollidioten", "missgeburten",
+      "schwuchteln",
+      "spasten", "spasti",
+      "miststueck",
+      "bastarde",
+      "blodmann",
     ];
 
     for (const v of variants) {
@@ -75,6 +90,18 @@ describe("German profanity detection", () => {
     it("detects separator: s.c.h.e.i.s.s.e", () => {
       expect(terlik.containsProfanity("s.c.h.e.i.s.s.e")).toBe(true);
     });
+  });
+
+  describe("whitelist — false positive prevention", () => {
+    const safeWords = [
+      "schwanger", "schwangerschaft", "geschichte",
+    ];
+
+    for (const word of safeWords) {
+      it(`does not flag '${word}'`, () => {
+        expect(terlik.containsProfanity(word)).toBe(false);
+      });
+    }
   });
 
   describe("clean text", () => {

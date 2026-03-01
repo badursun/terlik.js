@@ -4,21 +4,21 @@
   "entries": [
     {
       "root": "fuck",
-      "variants": ["fucking", "fucker", "fucked", "fuckers", "fucks", "fck", "fuk", "fuking", "fcking", "stfu", "motherfucker", "motherfucking", "fuckface", "fuckwit", "clusterfuck", "mindfuck"],
+      "variants": ["fucking", "fucker", "fucked", "fuckers", "fucks", "fck", "fuk", "fuking", "fcking", "stfu", "motherfucker", "motherfucking", "fuckface", "fuckwit", "clusterfuck", "mindfuck", "fuckboy", "fucktard", "fuckhead", "wtf", "mofo"],
       "severity": "high",
       "category": "sexual",
       "suffixable": true
     },
     {
       "root": "shit",
-      "variants": ["shitty", "bullshit", "shitting", "sht", "shits", "shite", "shithead", "shitstorm", "dipshit", "horseshit", "batshit", "apeshit", "shithole", "shitface", "shitshow"],
+      "variants": ["shitty", "bullshit", "shitting", "sht", "shits", "shite", "shithead", "shitstorm", "dipshit", "horseshit", "batshit", "apeshit", "shithole", "shitface", "shitshow", "shitbag", "shitload", "shithouse", "shitlist"],
       "severity": "high",
       "category": "general",
       "suffixable": true
     },
     {
       "root": "ass",
-      "variants": ["asses", "arse", "arses", "asshat", "asswipe", "smartass", "dumbass", "fatass", "badass", "jackass", "lardass", "kickass"],
+      "variants": ["asses", "arse", "arses", "asshat", "asswipe", "smartass", "dumbass", "fatass", "badass", "jackass", "lardass", "kickass", "asscrack", "assclown"],
       "severity": "medium",
       "category": "insult",
       "suffixable": false
@@ -32,7 +32,7 @@
     },
     {
       "root": "bitch",
-      "variants": ["bitches", "bitchy", "biatch", "bitching", "bitchass", "sonofabitch"],
+      "variants": ["bitches", "bitchy", "biatch", "bitching", "bitchass", "sonofabitch", "bitchslap"],
       "severity": "high",
       "category": "insult",
       "suffixable": true
@@ -53,7 +53,7 @@
     },
     {
       "root": "cock",
-      "variants": ["cocks", "cocksucker", "cocksucking", "cockhead"],
+      "variants": ["cocks", "cocksucker", "cocksucking", "cockhead", "cockblock"],
       "severity": "high",
       "category": "sexual",
       "suffixable": false
@@ -162,17 +162,113 @@
       "severity": "medium",
       "category": "insult",
       "suffixable": false
+    },
+    {
+      "root": "spic",
+      "variants": ["spick", "spics", "spicks"],
+      "severity": "high",
+      "category": "slur",
+      "suffixable": false
+    },
+    {
+      "root": "kike",
+      "variants": ["kikes"],
+      "severity": "high",
+      "category": "slur",
+      "suffixable": false
+    },
+    {
+      "root": "chink",
+      "variants": ["chinks", "chinky"],
+      "severity": "high",
+      "category": "slur",
+      "suffixable": false
+    },
+    {
+      "root": "gook",
+      "variants": ["gooks"],
+      "severity": "high",
+      "category": "slur",
+      "suffixable": false
+    },
+    {
+      "root": "tranny",
+      "variants": ["trannies", "trannie"],
+      "severity": "high",
+      "category": "slur",
+      "suffixable": false
+    },
+    {
+      "root": "dyke",
+      "variants": ["dykes"],
+      "severity": "high",
+      "category": "slur",
+      "suffixable": false
+    },
+    {
+      "root": "coon",
+      "variants": ["coons"],
+      "severity": "high",
+      "category": "slur",
+      "suffixable": false
+    },
+    {
+      "root": "wetback",
+      "variants": ["wetbacks"],
+      "severity": "high",
+      "category": "slur",
+      "suffixable": false
+    },
+    {
+      "root": "bellend",
+      "variants": ["bellends"],
+      "severity": "medium",
+      "category": "insult",
+      "suffixable": false
+    },
+    {
+      "root": "skank",
+      "variants": ["skanks", "skanky"],
+      "severity": "medium",
+      "category": "insult",
+      "suffixable": true
+    },
+    {
+      "root": "scumbag",
+      "variants": ["scumbags"],
+      "severity": "medium",
+      "category": "insult",
+      "suffixable": false
+    },
+    {
+      "root": "turd",
+      "variants": ["turds"],
+      "severity": "low",
+      "category": "general",
+      "suffixable": false
+    },
+    {
+      "root": "bugger",
+      "variants": ["buggered", "buggering", "buggers", "buggery"],
+      "severity": "medium",
+      "category": "general",
+      "suffixable": true
     }
   ],
   "whitelist": [
     "assembly",
     "assist",
     "assassin",
+    "assassinate",
+    "assistant",
+    "assessment",
     "bass",
     "class",
     "classic",
     "classify",
+    "classroom",
     "grass",
+    "grasshopper",
     "mass",
     "massive",
     "pass",
@@ -190,11 +286,18 @@
     "dickens",
     "cocktail",
     "cockatoo",
+    "cockatiel",
+    "cockpit",
+    "cockroach",
+    "cockney",
     "peacock",
     "hancock",
+    "shuttlecock",
+    "woodcock",
     "scrap",
     "scrappy",
     "shitake",
+    "shiitake",
     "document",
     "buckle",
     "piston",
@@ -206,6 +309,12 @@
     "massage",
     "compass",
     "trespass",
-    "harass"
+    "harass",
+    "cocoon",
+    "raccoon",
+    "tycoon",
+    "dike",
+    "vandyke",
+    "scunthorpe"
   ]
 }

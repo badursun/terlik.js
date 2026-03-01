@@ -33,7 +33,8 @@
         "sike", "siken", "siker", "sikti", "siktiler", "sikmis", "sikmek",
         "sikecek", "sikiyor", "sikme", "sikici", "siksin", "siktirler",
         "sikimsonik", "siktirin", "siktiler", "sikerler", "sikiler",
-        "siktiğimin", "sikermisiniz", "sikermisin", "siktirmişcesine"
+        "siktiğimin", "sikermisiniz", "sikermisin", "siktirmişcesine",
+        "sktr"
       ],
       "severity": "high",
       "category": "sexual",
@@ -41,14 +42,20 @@
     },
     {
       "root": "amk",
-      "variants": ["amk", "amina", "aminakoyim", "aminakoydugum", "amq"],
+      "variants": [
+        "amk", "amina", "aminakoyim", "aminakoydugum", "amq",
+        "aminakoyayim", "aminakoydum", "aminakoydugumun", "aq"
+      ],
       "severity": "high",
       "category": "sexual",
       "suffixable": false
     },
     {
       "root": "orospu",
-      "variants": ["orospucocugu", "orosbucocugu", "orspu", "oruspu", "orosbu"],
+      "variants": [
+        "orospucocugu", "orosbucocugu", "orspu", "oruspu", "orosbu",
+        "orospucocuklari"
+      ],
       "severity": "high",
       "category": "insult",
       "suffixable": true
@@ -62,7 +69,10 @@
     },
     {
       "root": "yarrak",
-      "variants": ["yarak", "yarrak", "yarakli", "dalyarak", "dalyarrak"],
+      "variants": [
+        "yarak", "yarrak", "yarakli", "dalyarak", "dalyarrak",
+        "yarrani", "yarragimi", "yarragini"
+      ],
       "severity": "high",
       "category": "sexual",
       "suffixable": true
@@ -71,7 +81,8 @@
       "root": "göt",
       "variants": [
         "got", "gotunu", "gotlek", "gotveren", "gotverenler",
-        "gote", "gotu", "gotler", "gotlu", "gotunden", "gotune"
+        "gote", "gotu", "gotler", "gotlu", "gotunden", "gotune",
+        "gotos"
       ],
       "severity": "high",
       "category": "sexual",
@@ -211,6 +222,104 @@
       "severity": "high",
       "category": "insult",
       "suffixable": true
+    },
+    {
+      "root": "sürtük",
+      "variants": ["surtuk"],
+      "severity": "high",
+      "category": "insult",
+      "suffixable": true
+    },
+    {
+      "root": "kaltak",
+      "variants": [],
+      "severity": "high",
+      "category": "insult",
+      "suffixable": true
+    },
+    {
+      "root": "fahişe",
+      "variants": ["fahise"],
+      "severity": "high",
+      "category": "insult",
+      "suffixable": true
+    },
+    {
+      "root": "kevaşe",
+      "variants": ["kevase"],
+      "severity": "medium",
+      "category": "insult",
+      "suffixable": true
+    },
+    {
+      "root": "oğlancı",
+      "variants": ["oglanci"],
+      "severity": "high",
+      "category": "slur",
+      "suffixable": true
+    },
+    {
+      "root": "dingil",
+      "variants": [],
+      "severity": "low",
+      "category": "insult",
+      "suffixable": true
+    },
+    {
+      "root": "avanak",
+      "variants": [],
+      "severity": "low",
+      "category": "insult",
+      "suffixable": true
+    },
+    {
+      "root": "manyak",
+      "variants": [],
+      "severity": "low",
+      "category": "insult",
+      "suffixable": true
+    },
+    {
+      "root": "hödük",
+      "variants": ["hoduk"],
+      "severity": "low",
+      "category": "insult",
+      "suffixable": true
+    },
+    {
+      "root": "kepaze",
+      "variants": [],
+      "severity": "medium",
+      "category": "insult",
+      "suffixable": true
+    },
+    {
+      "root": "rezil",
+      "variants": [],
+      "severity": "medium",
+      "category": "insult",
+      "suffixable": true
+    },
+    {
+      "root": "kalleş",
+      "variants": ["kalles"],
+      "severity": "medium",
+      "category": "insult",
+      "suffixable": true
+    },
+    {
+      "root": "namussuz",
+      "variants": [],
+      "severity": "medium",
+      "category": "insult",
+      "suffixable": true
+    },
+    {
+      "root": "ahlaksız",
+      "variants": ["ahlaksiz"],
+      "severity": "medium",
+      "category": "insult",
+      "suffixable": true
     }
   ],
   "whitelist": [
@@ -232,6 +341,10 @@
     "amonyak",
     "amper",
     "ampul",
+    "amazon",
+    "ambargo",
+    "amblem",
+    "amfibi",
     "boksör",
     "bokser",
     "bokluk",
@@ -243,6 +356,7 @@
     "mallorca",
     "malta",
     "malt",
+    "malum",
     "gotan",
     "gotik",
     "gotham",
@@ -260,11 +374,19 @@
     "dolunay",
     "dolum",
     "doluluk",
+    "dolap",
+    "dolar",
+    "dolma",
+    "dolmus",
     "ama",
     "ami",
     "amen",
     "amir",
     "amil",
-    "dolmen"
+    "dolmen",
+    "namus",
+    "namuslu",
+    "ahlak",
+    "ahlaki"
   ]
 }

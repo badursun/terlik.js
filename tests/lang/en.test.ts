@@ -24,6 +24,19 @@ describe("English profanity detection", () => {
       { word: "retard", text: "you retard" },
       { word: "faggot", text: "stupid faggot" },
       { word: "douche", text: "total douche" },
+      { word: "spic", text: "dirty spic" },
+      { word: "kike", text: "filthy kike" },
+      { word: "chink", text: "stupid chink" },
+      { word: "gook", text: "dirty gook" },
+      { word: "tranny", text: "ugly tranny" },
+      { word: "dyke", text: "stupid dyke" },
+      { word: "coon", text: "dirty coon" },
+      { word: "wetback", text: "filthy wetback" },
+      { word: "bellend", text: "you bellend" },
+      { word: "skank", text: "total skank" },
+      { word: "scumbag", text: "what a scumbag" },
+      { word: "turd", text: "you turd" },
+      { word: "bugger", text: "bugger off" },
     ];
 
     for (const { word, text } of roots) {
@@ -36,9 +49,11 @@ describe("English profanity detection", () => {
   describe("variant detection", () => {
     const variants = [
       "fucking", "fucker", "motherfucker", "stfu",
+      "fuckboy", "fucktard", "fuckhead", "wtf", "mofo",
       "shitty", "bullshit", "dipshit", "shithole",
-      "bitchy", "bitching",
-      "cocksucker", "cocksucking",
+      "shitbag", "shitload", "shithouse", "shitlist",
+      "bitchy", "bitching", "bitchslap",
+      "cocksucker", "cocksucking", "cockblock",
       "slutty", "whorish",
       "pissed", "pissing",
       "wanker", "wanking",
@@ -47,7 +62,12 @@ describe("English profanity detection", () => {
       "douchebag",
       "dickhead", "dickwad",
       "jackass", "dumbass", "smartass",
+      "asscrack", "assclown",
       "goddamn",
+      "spicks", "kikes", "chinks", "chinky", "gooks",
+      "trannies", "dykes", "coons", "wetbacks",
+      "bellends", "skanky", "scumbags", "turds",
+      "buggered", "buggering", "buggery",
     ];
 
     for (const v of variants) {
@@ -81,12 +101,17 @@ describe("English profanity detection", () => {
 
   describe("whitelist — false positive prevention", () => {
     const safeWords = [
-      "assassin", "class", "classic", "classify", "grass",
+      "assassin", "assassinate", "assistant", "assessment",
+      "class", "classic", "classify", "classroom", "grass", "grasshopper",
       "mass", "massive", "pass", "passage", "passenger",
       "passion", "passive", "passport", "assume", "asset",
-      "assess", "dickens", "cocktail", "cockatoo", "peacock",
+      "assess", "dickens", "cocktail", "cockatoo", "cockatiel",
+      "cockpit", "cockroach", "cockney", "peacock",
+      "shuttlecock", "woodcock",
       "scrap", "piston", "bassist", "embassy", "hassle",
-      "massage", "compass", "harass",
+      "massage", "compass", "harass", "shiitake",
+      "cocoon", "raccoon", "tycoon",
+      "dike", "vandyke", "scunthorpe",
     ];
 
     for (const word of safeWords) {
