@@ -1,6 +1,6 @@
 {
   "name": "terlik.js",
-  "version": "2.3.0",
+  "version": "2.4.0",
   "description": "Ultra-fast, zero-dependency multi-language profanity detection engine for Turkish, English, Spanish, and German with lazy compilation, deep agglutination support, and ReDoS-safe regex patterns",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
