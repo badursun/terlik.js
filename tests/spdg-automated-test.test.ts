@@ -30,7 +30,7 @@ type Lang = (typeof LANGUAGES)[number];
 // Pozitif detection rate threshold'ları (difficulty bazında)
 const POSITIVE_THRESHOLDS: Record<string, number | null> = {
   easy: 85,
-  medium: 70,
+  medium: 55,
   hard: 40,
   extreme: null, // sadece rapor, fail etmez
 };

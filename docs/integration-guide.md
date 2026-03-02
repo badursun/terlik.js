@@ -1,6 +1,6 @@
 # terlik.js Integration Guide
 
-Practical examples for integrating terlik.js into your project. Each section is self-contained — jump to the framework you use.
+Practical examples for integrating terlik.js into your project. Each section is self-contained — jump to the framework you use. For the full API reference see [docs/api.md](./api.md), for the project overview see the [README](../README.md).
 
 **Contents:**
 
@@ -40,8 +40,8 @@ terlik.clean("siktir git burdan");       // "****** git burdan"
 // Get detailed matches
 const matches = terlik.getMatches("aptal orospu");
 // [
-//   { word: "aptal", root: "aptal", index: 0, severity: "medium", method: "pattern" },
-//   { word: "orospu", root: "orospu", index: 6, severity: "high", method: "pattern" }
+//   { word: "aptal", root: "aptal", index: 0, severity: "medium", category: "insult", method: "pattern" },
+//   { word: "orospu", root: "orospu", index: 6, severity: "high", category: "insult", method: "pattern" }
 // ]
 ```
 
@@ -331,7 +331,7 @@ export function CommentForm() {
 }
 ```
 
-> **Note:** terlik.js uses Node.js APIs and compiled regex patterns. It runs on the **server side only** (API Routes, Server Actions, Server Components). It is not compatible with Edge Runtime or client-side bundles.
+> **Note:** terlik.js runs on the **server side only** (API Routes, Server Actions, Server Components). While it works in any V8/JavaScriptCore environment (Node.js, Bun, Deno, modern browsers, Cloudflare Workers), shipping profanity dictionaries to the client is not recommended. For Next.js specifically, do not use it in Edge Runtime middleware — use a Node.js API route or Server Action instead.
 
 ---
 
@@ -626,14 +626,14 @@ const strict = new Terlik({ mode: "strict" });
 const loose = new Terlik({ mode: "loose", enableFuzzy: true, fuzzyThreshold: 0.7 });
 ```
 
-### 4. Handle Edge Runtime Limitations
+### 4. Runtime Compatibility
 
-terlik.js relies on compiled regex with Unicode lookbehind assertions. These require a full Node.js runtime.
+terlik.js uses regex lookbehind assertions, supported in all modern JavaScript runtimes:
 
-- **Works:** Node.js, Bun, Deno
-- **Does NOT work:** Cloudflare Workers, Vercel Edge Runtime, browser
+- **Works:** Node.js 18+, Bun, Deno, modern browsers (Chrome 62+, Firefox 78+, Safari 16.4+), Cloudflare Workers
+- **Not recommended:** Client-side bundles (exposes dictionary data), Vercel Edge Runtime (limited API surface)
 
-For edge-based architectures, call terlik.js from a Node.js API route or serverless function, not from edge middleware.
+For Next.js and Nuxt, always use server-side routes. For edge-based architectures, call terlik.js from a Node.js API route or serverless function.
 
 ### 5. Combine with Application Logic
 

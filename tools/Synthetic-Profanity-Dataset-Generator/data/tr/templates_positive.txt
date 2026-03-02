@@ -1,17 +1,103 @@
 # Pozitif (toxic) template'ler — Türkçe
 # {word} placeholder ile kök kelime yerleştirilir
+
+# === DOĞRUDAN HAKARET ===
 seni {word}
 lan {word}
 {word} herif
 {word} seni
-hadi {word}
 ulan {word}
 ya {word}
-bir {word} gibi
-{word} olma
-ne {word} adamsın
-tam bir {word}
-{word} ya
 sen ne {word} birisin
 {word} gibi davranma
+tam bir {word}
+ne {word} adamsın
+{word} ya
 {word} lafı
+hadi {word}
+bir {word} gibi
+{word} olma
+{word} musun nesin
+ne biçim {word} bu
+kes {word}
+
+# === SOSYAL MEDYA / CHAT ===
+{word}!!!
+{word}!!!!!!!
+ya {word} ya
+{word} olm
+{word} be
+ahahah {word}
+{word} LMAO
+{word} sjsjsj
+{word} kdkdkd
+hahahah {word}
+{word} lol
+{word} xd
+{word} djdjdj
+lna {word}
+{word} amına koyim
+hay {word}
+vay {word}
+{word} lan
+off {word}
+puahaha {word}
+{word} dkdkdk
+
+# === SORU / RETORİK ===
+sen {word} mısın?
+{word} misin sen?
+bu ne biçim {word}?
+ne {word} bir insan bu?
+nasıl bu kadar {word} olabilirsin?
+{word} olmaktan sıkılmadın mı?
+sen {word} müsün yoksa?
+bu kadar {word} olunmaz ki
+{word} olduğunun farkında mısın?
+
+# === BAĞLAMLI / DOLAYLI ===
+adam {word} gibi bir şey
+{word} diye tabir edilen
+{word} kelimesinin canlı hali
+{word} olduğu aşikar
+dünya {word} dolu
+bu tarz {word} insanlar yüzünden
+{word} demenin başka yolu yok
+ne yazık ki {word} çıktı
+{word} biri olduğunu biliyordum
+{word} denilecek bir durum
+
+# === ÇOK KELİMELİ / COMBO ===
+seni gidi {word}
+{word} herif seni
+vay {word} vay
+ulan seni {word}
+tüh seni {word}
+hay {word} hay
+{word} {word2} seni
+lan {word} {word2}
+kes sesini {word}
+
+# === TEHDİT KARIŞIMI ===
+{word} seni gidi
+{word} seni bulursam
+{word} seni gebertirim
+{word} defol
+{word} kaybol gözümden
+{word} uzaklaş benden
+seni {word} seni
+
+# === İRONİ / ALAYI ===
+çok {word} bir hareket
+bravo ne {word} bir iş
+aferin ne kadar {word}
+vay be ne {word}
+süpersin tam bir {word}
+helal olsun {word}
+
+# === UZUN KALIPLAR ===
+hayatımda gördüğüm en {word} insansın
+senin kadar {word} birini tanımadım
+bu kadar {word} bir yorum görmedim
+{word} olmak için uğraşıyorsun sanki
+dünyada senden {word} biri yok

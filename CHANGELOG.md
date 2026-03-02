@@ -2,6 +2,48 @@
 
 All notable changes to terlik.js are documented here.
 
+## v2.6.0 (2026-03-02) — TR + EN Dictionary Expansion & Benchmark Enrichment
+
+**Massive TR dictionary expansion (39 → 147 entries), EN dictionary expansion (56 → 138 entries), and SPDG-driven benchmark enrichment (290 → 1280 samples).**
+
+### Turkish Dictionary
+- **Turkish dictionary overhaul** — 108 new entries across 8 categories: character insults (`alçak`, `terbiyesiz`, `küstah`), general insults (`budala`, `ahmak`, `embesil`), slang (`çomar`, `maganda`, `yobaz`), fraud/deception (`dolandırıcı`, `sahtekar`, `şarlatan`), threats (`geber`, `öldürücem`, `defol`), sexual (`kerhane`, `kaşar`, `sakso`), abbreviations (`sg`, `oç`, `sktrgt`), animal insults (`domuz`, `öküz`, `eşek`).
+- **Existing entry enrichment** — New variants for `sik`, `amk`, `orospu`, `piç`, `yarrak`, `göt`, `taşak`, `ibne` entries.
+- **Whitelist expansion** — 10 new FP protections: `domuzderisi`, `öküzgözü`, `maymuncuk`, `kaşarpeyniri` etc.
+- **SPDG data cleanup** — Removed Grup D roots (words intentionally excluded from dictionary) from synthetic test data for realistic benchmarking.
+- **TR SPDG detection rates** — easy 92%, medium 71%, hard 59%, FP 0.4%.
+
+### English Dictionary
+- **EN dictionary overhaul** — 82 new entries: racial/ethnic slurs (`beaner`, `dago`, `raghead`, `towelhead`), sexuality slurs (`homo`, `lesbo`, `poof`, `fudgepacker`), sexual terms (`butthole`, `gangbang`, `deepthroat`, `creampie`), insults (`cuck`, `thot`, `knob`, `pillock`), serious insults (`nonce`, `pedo`, `spastic`, `incel`), vulgar slang (`fap`, `jerkoff`, `circlejerk`).
+- **Competitor mining** — Analyzed bad-words (447 words), allprofanity (252 words), obscenity (69 patterns). Added 27 genuinely missing roots (`bukkake`, `cunnilingus`, `shemale`, `jailbait`, `schmuck`, etc.).
+- **Existing entry enrichment** — New variants: `shitpost`, `shitposting`, `camwhore`, `manwhore`, `camslut`, `nig`, `pornstar`, `cockring`, `titjob`, `cumslut`, `cumrag`, `bulldyke`.
+- **Whitelist expansion** — 9 new FP protections: `homogeneous`, `homogenous`, `homophone`, `homonym`, `homologous`, `homosexual`, `shaggy`, `doorknob`, `spunky`.
+- **EN root count** — 56 → 138 roots, ~200 → 342 variants, 97 → 105 whitelist entries.
+
+### SPDG & Benchmark
+- **EN SPDG data enrichment** — Comprehensive suffix list (9 → 90), leet map (9 → 16 mappings), templates (15 → 87 positive, 15 → 63 negative), contexts (15 → 40 each), emoji replacements (15 → 25).
+- **Benchmark dataset enrichment** — Dynamic SPDG import in `dataset.ts`: curated 290 samples + SPDG-generated 990 samples = **1280 total samples** with category mapping.
+- **1341 tests** passing, zero regression.
+
+## v2.5.0 (2026-03-02) — Security Normalization + Per-Language Bundles
+
+**Multi-pass security hardening, English detection overhaul, per-language tree-shakeable entry points.**
+
+- **10-stage normalization pipeline** — Added NFKD decomposition (catches fullwidth evasion `ｆｕｃｋ`), combining mark stripping (diacritics evasion `s̈h̊ït`), and Cyrillic confusable mapping (`а`→`a`, `о`→`o`, `с`→`c`).
+- **CamelCase decompounding** — 3rd detection pass splits `ShitLord`, `FuckYou` into components for matching.
+- **Per-call strictness toggles** — `disableLeetDecode`, `disableCompound`, `minSeverity`, `excludeCategories` options at both constructor and per-call level.
+- **English detection overhaul** — F1 92.7% → 100%. 20 new roots, 46 variants, 36 whitelist entries. Phonetic matching (`phuck`), extended leet (`8itch`, `ni66er`).
+- **Per-language entry points** — `import { Terlik } from "terlik.js/tr"` for tree-shakeable single-language bundles (~10 KB gzip vs ~14 KB full).
+- **`TerlikCore` class** — Low-level engine accepting `LanguageConfig` directly, exported from all entry points.
+- **`createTerlik()` factory** — Convenience function per language entry.
+- **Benchmark comparison** — Automated comparison vs bad-words, obscenity, allprofanity. terlik.js achieves 100% F1 on 290-sample English corpus.
+- **1333 tests** passing.
+
+## v2.4.1 (2026-03-01) — SEO & Documentation
+
+- **SEO overhaul** — Updated package description, badges, npm topics, community files.
+- **Social preview** — Added header image to README.
+
 ## v2.4.0 (2026-03-01) — extendDictionary + Detection Leak Fix
 
 - **`extendDictionary` option** — Merge external dictionaries at construction time. Add custom roots, variants, suffixes, and whitelist entries without forking the package.

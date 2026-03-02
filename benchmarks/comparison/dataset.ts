@@ -1,10 +1,75 @@
+import { readFileSync, existsSync } from "node:fs";
+import { join, dirname } from "node:path";
+import { fileURLToPath } from "node:url";
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+
 export interface Sample {
   text: string;
   profane: boolean;
   category: string;
 }
 
-export const dataset: Sample[] = [
+// ─── SPDG import ───────────────────────────────────────────────────────
+interface SPDGEntry {
+  text: string;
+  label: number;
+  root: string;
+  difficulty: string;
+  transforms: string[];
+  category: string;
+}
+
+function mapSPDGCategory(entry: SPDGEntry): string {
+  if (entry.label === 0) return "spdg_clean";
+
+  const t = entry.transforms;
+  if (t.length === 0) return "spdg_plain";
+  if (t.length === 1) {
+    if (t[0] === "leet") return "spdg_leet";
+    if (t[0] === "separator") return "spdg_separator";
+    if (t[0] === "doubling" || t[0] === "charRepeat") return "spdg_repetition";
+    if (t[0] === "case") return "spdg_plain"; // case-only is still plain-ish
+    if (t[0] === "suffix") return "spdg_variant";
+    if (t[0] === "reverse") return "spdg_evasion";
+    if (t[0] === "unicode") return "spdg_unicode";
+    if (t[0] === "zalgo") return "spdg_zalgo";
+    if (t[0] === "zwc") return "spdg_zwc";
+    if (t[0] === "split") return "spdg_split";
+    if (t[0] === "emojiMix") return "spdg_emoji";
+    if (t[0] === "vowelDrop") return "spdg_evasion";
+    return "spdg_evasion";
+  }
+  // 2+ transforms → combined
+  return "spdg_combined";
+}
+
+function loadSPDG(): Sample[] {
+  const spdgPath = join(__dirname, "../../tools/Synthetic-Profanity-Dataset-Generator/output/export-en.jsonl");
+  if (!existsSync(spdgPath)) return [];
+
+  const lines = readFileSync(spdgPath, "utf8").trim().split("\n");
+  const samples: Sample[] = [];
+  const seen = new Set<string>();
+
+  for (const line of lines) {
+    const entry: SPDGEntry = JSON.parse(line);
+    const key = entry.text.toLowerCase().trim();
+    if (seen.has(key)) continue;
+    seen.add(key);
+
+    samples.push({
+      text: entry.text,
+      profane: entry.label === 1,
+      category: mapSPDGCategory(entry),
+    });
+  }
+  return samples;
+}
+
+// ─── Curated dataset (hand-crafted baseline) ────────────────────────────
+
+const curatedDataset: Sample[] = [
   // ─── PLAIN PROFANITY (50) ───────────────────────────────────────────
   { text: "fuck you", profane: true, category: "plain" },
   { text: "shit happens", profane: true, category: "plain" },
@@ -323,8 +388,26 @@ export const dataset: Sample[] = [
   { text: "embedded hell in the middle of a long clean sentence about weather", profane: true, category: "edge_case" },
 ];
 
+// ─── Merged dataset: curated + SPDG ─────────────────────────────────────
+
+function mergeDatasets(): Sample[] {
+  const curated = curatedDataset;
+  const spdg = loadSPDG();
+
+  // Deduplicate: curated takes priority
+  const seen = new Set(curated.map((s) => s.text.toLowerCase().trim()));
+  const uniqueSPDG = spdg.filter((s) => !seen.has(s.text.toLowerCase().trim()));
+
+  return [...curated, ...uniqueSPDG];
+}
+
+export const dataset: Sample[] = mergeDatasets();
+
+/** Just the curated portion — for backward compat */
+export const curatedOnly: Sample[] = curatedDataset;
+
 /** Subset of samples for throughput testing — mixed clean/dirty */
 export const throughputCorpus: string[] = dataset
-  .filter((s) => s.category !== "edge_case")
+  .filter((s) => s.category !== "edge_case" && !s.category.startsWith("spdg_"))
   .slice(0, 100)
   .map((s) => s.text);

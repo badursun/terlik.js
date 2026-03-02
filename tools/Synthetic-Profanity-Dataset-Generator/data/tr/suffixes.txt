@@ -1,4 +1,6 @@
-# Türkçe ekler — dictionary.json suffixes'ten
+# Türkçe ekler — agglutination simulation
+
+# Fiil çekim ekleri
 tir
 dir
 il
@@ -43,9 +45,21 @@ me
 ma
 is
 us
+
+# Çoğul
 ler
 lar
+
+# İyelik
 si
+i
+un
+lari
+leri
+larin
+lerin
+
+# Hal ekleri
 e
 a
 de
@@ -56,7 +70,8 @@ te
 ta
 ten
 tan
-i
+
+# İsimden isim
 lik
 luk
 li
@@ -65,20 +80,37 @@ ci
 cu
 ce
 ca
+
+# Zarf / bağlaç
 le
 la
 ken
-esi
-un
-lari
-leri
-larin
-lerin
+cesine
+casina
+
+# Soru
 misin
 misiniz
 musun
 musunuz
 miyim
 miyiz
-cesine
-casina
+
+# Edilgen / dönüşlü
+esi
+
+# Ek fiil
+dir
+tir
+dır
+tır
+
+# Küçültme / pekiştirme
+cik
+cık
+cuk
+cük
+ce
+ca
+ler
+lar

@@ -20,7 +20,7 @@ Ships with **Turkish** (flagship, full coverage), **English**, **Spanish**, and 
 
 - **Extensible to any language** — ships with TR/EN/ES/DE, add more via language packs or `extendDictionary`
 - Catches leet speak, separators, char repetition, mixed case, zero-width chars
-- Turkish suffix engine (83 suffixes, ~3,000+ detectable forms from 30 roots)
+- Turkish suffix engine (83 suffixes, ~10,000+ detectable forms from 147 roots)
 - Three detection modes: strict, balanced, loose (with fuzzy matching)
 - Zero dependencies, **~14 KB** gzip (single language: **~10 KB** with per-language imports)
 - Per-language sub-path imports for minimal bundle size (`terlik.js/tr`, `/en`, `/es`, `/de`)
@@ -162,7 +162,7 @@ input
 
 Each language has its own char map, leet map, char classes, and optional number expansions. The engine is language-agnostic — only the data is language-specific. This means **any language can be added** without modifying the core engine.
 
-For suffixable roots, the engine appends an optional suffix group (up to 2 chained suffixes). Turkish has 83 suffixes (including question particles and adverbial forms), English has 9, Spanish has 13, German has 8.
+For suffixable roots, the engine appends an optional suffix group (up to 2 chained suffixes). Turkish has 83 suffixes (including question particles and adverbial forms), English has 90 (inflectional, noun/adjective/verb/adverb-forming, and compound elements), Spanish has 13, German has 8.
 
 ### Language Packs
 
@@ -212,8 +212,8 @@ terlik.js ships with a **deliberately narrow dictionary** — the goal is to **m
 
 | Language | Status | Roots | Explicit Variants | Suffixes | Whitelist | Effective Forms |
 |---|---|---|---|---|---|---|
-| Turkish | Flagship | 39 | 101 | 83 | 77 | ~3,000+ |
-| English | Full | 56 | 200 | 9 | 96 | ~2,000+ |
+| Turkish | Flagship | 147 | 139 | 83 | 87 | ~10,000+ |
+| English | Full | 138 | 342 | 90 | 105 | ~10,000+ |
 | Spanish | Community | 29 | 101 | 13 | 21 | ~500+ |
 | German | Community | 28 | 67 | 8 | 6 | ~300+ |
 
@@ -328,18 +328,18 @@ Benchmark results (Apple Silicon, single core, msgs/sec):
 
 ### vs Alternatives (English corpus)
 
-Head-to-head comparison on a 290-sample English corpus covering plain text, variants, leet speak, separator evasion, char repetition, combined evasion, false-positive traps, and edge cases. All libraries tested with default settings.
+Head-to-head comparison on a **1280-sample English corpus** (290 curated + 990 SPDG-generated adversarial samples) covering plain text, variants, leet speak, separator evasion, char repetition, combined evasion, false-positive traps, edge cases, and synthetic adversarial patterns (zalgo, zero-width chars, unicode homoglyphs, reverse, vowel drop). All libraries tested with default settings.
 
 | Library | F1 | Precision | Recall | FPR | check() ops/sec | clean() ops/sec |
 |---|---|---|---|---|---|---|
-| **terlik.js** | **100.0%** | **100.0%** | **100.0%** | **0.0%** | 67,623 | **71,321** |
-| obscenity | 81.7% | 97.4% | 70.4% | 2.3% | 71,914 | 49,978 |
-| bad-words | 66.1% | 100.0% | 49.4% | 0.0% | 2,831 | 557 |
-| allprofanity | 59.7% | 100.0% | 42.6% | 0.0% | 45,450 | 45,162 |
+| **terlik.js** | **78.5%** | **100.0%** | **64.7%** | **0.0%** | 38K | 37K |
+| obscenity | 44.0% | 86.0% | 29.6% | 5.2% | **73K** | **52K** |
+| bad-words | 33.0% | 100.0% | 19.8% | 0.0% | 3K | 614 |
+| allprofanity | 29.4% | 95.0% | 17.4% | 1.0% | 47K | 47K |
 
-terlik.js achieves **perfect detection** — 100% precision, 100% recall, zero false positives — with competitive throughput (~68K check ops/sec, **fastest clean()** at 71K ops/sec). It catches **100% of separator and repetition evasions** that other libraries miss entirely. See [full methodology, per-category breakdown, and limitations](./docs/benchmark-comparison.md).
+On the **curated 290-sample subset**, terlik.js achieves **100% F1** — perfect precision, perfect recall, zero false positives. The overall F1 of 78.5% reflects intentionally adversarial SPDG samples (zalgo text, zero-width chars, unicode homoglyphs) that stress-test detection boundaries. terlik.js **still leads by 34+ F1 points** over every competitor. See [full methodology, per-category breakdown, and limitations](./docs/benchmark-comparison.md).
 
-> **Throughput note:** The multi-pass detection pipeline (NFKD, Cyrillic confusable mapping, CamelCase decompounding) costs ~17% vs a naive single-pass approach — this is what enables 100% recall vs obscenity's 70%. Optional toggles (`disableLeetDecode`, `disableCompound`) can recover ~5-8% for controlled inputs. Safety layers (NFKD, diacritics, Cyrillic) are always active. See [full toggle guide](./docs/benchmark-comparison.md#where-does-the-throughput-go).
+> **Throughput note:** The multi-pass detection pipeline (NFKD, Cyrillic confusable mapping, CamelCase decompounding) costs ~17% vs a naive single-pass approach — this is what enables the highest recall among all tested libraries. Optional toggles (`disableLeetDecode`, `disableCompound`) can recover ~5-8% for controlled inputs. Safety layers (NFKD, diacritics, Cyrillic) are always active. See [full toggle guide](./docs/benchmark-comparison.md#where-does-the-throughput-go).
 >
 > **Transparency:** This benchmark is maintained by the terlik.js team. Dataset, adapters, and runner are open source. Reproduce with `pnpm bench:compare`. We document every false positive and miss — [see the full report](./docs/benchmark-comparison.md).
 
@@ -516,7 +516,7 @@ Low-level class that accepts a pre-resolved `LanguageConfig` instead of a langua
 
 ## Testing
 
-1333 tests covering all built-in languages, 39 Turkish root words, 56 English roots, suffix detection, lazy compilation, multi-language isolation, normalization, fuzzy matching, cleaning, integration, ReDoS hardening, attack surface coverage, external dictionary merging, per-language entry points, and edge cases:
+1341 tests covering all built-in languages, 147 Turkish root words, 138 English roots, suffix detection, lazy compilation, multi-language isolation, normalization, fuzzy matching, cleaning, integration, ReDoS hardening, attack surface coverage, external dictionary merging, per-language entry points, and edge cases:
 
 ```bash
 pnpm test          # run once

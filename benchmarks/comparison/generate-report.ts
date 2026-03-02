@@ -436,7 +436,7 @@ ${mdTable(headers, bolded, align)}
 | **F1** | Combined score (harmonic mean of Precision & Recall) | Single number to compare overall quality. 100% = perfect. |
 | **FPR** | "How often does it wrongly flag clean text?" | Even 1% FPR means 1 in 100 clean messages gets blocked. |
 
-**The bottom line:** terlik.js catches everything (100% recall) without any false alarms (100% precision). The next best library (obscenity) misses 30% of profanity and wrongly flags 2.3% of clean text.`;
+**The bottom line:** terlik.js achieves the highest F1 score with **perfect precision** (zero false positives) and the **best recall** among all tested libraries. On the curated 290-sample subset, terlik.js achieves 100% on all metrics.`;
 }
 
 function sectionCategoryBreakdown(data: BenchmarkData): string {
@@ -665,7 +665,7 @@ A filter that blocks "analysis" because it contains "anal", or "grape" because i
 |---|:---:|---|
 ${rows.map((r) => `| ${r.join(" | ")} |`).join("\n")}
 
-**How does terlik.js avoid false positives with 56 roots?** A 96-entry whitelist explicitly protects words like:
+**How does terlik.js avoid false positives with 138 roots?** A 105-entry whitelist explicitly protects words like:
 
 | Tricky word | Contains | Why it's safe |
 |---|---|---|
@@ -929,18 +929,18 @@ function sectionBundleSize(): string {
 | bad-words | ~15 KB | ~3 KB | 1 (badwords-list) |
 | allprofanity | ~80 KB | ~15 KB | 2 |
 
-**Dictionary expansion + strictness toggles impact (v2.4.1 → current):**
+**Dictionary expansion impact (v2.4.1 → current):**
 
 | | v2.4.1 | Current | Delta |
 |---|---:|---:|---:|
-| English roots | 36 | 56 | +20 |
-| Explicit variants | 139 | 200 | +61 |
-| Whitelist entries | 60 | 96 | +36 |
-| Suffix rules | 8 | 9 | +1 |
+| English roots | 36 | 138 | +102 |
+| Explicit variants | 139 | 342 | +203 |
+| Whitelist entries | 60 | 105 | +45 |
+| Suffix rules | 8 | 90 | +82 |
 | ESM raw | ~57 KB | ~67 KB | +10 KB |
 | ESM gzip | ~12 KB | ~14 KB | **+2 KB** |
 
-> The English detection overhaul (20 new roots, 46 variants, 36 whitelist entries) plus Phase 1-4 features (NFKD normalization, CamelCase decompounding, Cyrillic confusable handling, strictness toggles) added only **+2 KB gzipped**.`;
+> The English dictionary expansion (102 new roots, 203 variants, 45 whitelist entries, 82 suffix rules) plus multi-pass normalization features added only **+2 KB gzipped**.`;
 }
 
 function sectionTradeoff(data: BenchmarkData): string {
@@ -997,9 +997,9 @@ ${mdTable(
   )}
 
 **In plain English:**
-- **terlik.js** — Perfect detection, competitive speed, zero dependencies. The only library that handles all evasion types. Slightly slower on check() than obscenity (~6%) due to multi-pass detection, but 43% faster on clean().
-- **obscenity** — Good precision, decent leet handling, marginally fastest check(). Can't handle separators and has no whitelist (causes false positives). Closest competitor on speed, distant on accuracy.
-- **bad-words** — Zero false positives, but misses over half of all profanity. Any determined user will bypass it. 24x slower than terlik.js.
+- **terlik.js** — Highest F1, perfect precision, zero false positives, competitive speed, zero dependencies. The only library that handles all evasion types. Multi-pass detection pipeline trades raw speed for detection depth.
+- **obscenity** — Decent leet handling, fastest raw throughput. Can't handle separators and has no whitelist (causes false positives). Closest competitor on speed, distant on accuracy.
+- **bad-words** — Zero false positives, but misses the majority of profanity. Any determined user will bypass it. Significantly slower than all competitors.
 - **allprofanity** — Similar to bad-words but with more language support. Weak evasion handling. Fast init but large memory footprint.`;
 }
 
@@ -1046,7 +1046,7 @@ Other libraries fail at different stages:
 function sectionTransparency(): string {
   return `## Transparency: Where terlik.js Can Still Improve
 
-100% on 290 samples doesn't mean perfection in the wild. Known limitations:
+Leading on 1280 samples doesn't mean perfection in the wild. Known limitations:
 
 | Limitation | Example | Status |
 |---|---|---|
@@ -1054,7 +1054,8 @@ function sectionTransparency(): string {
 | 3-letter root FP risk | "cum" in "cucumber" | Protected by whitelist, but new compounds may appear |
 | Rapidly evolving slang | New coinages not in dictionary | Use \`addWords()\` or \`customList\` at runtime |
 | Non-Latin scripts | Cyrillic "а" substituted for Latin "a" | Handled (Cyrillic confusable → Latin mapping) |
-| Dataset size | 290 samples is comprehensive but not exhaustive | Continuously expanding |
+| Adversarial transforms | Zalgo, zero-width chars, unicode homoglyphs | Partially handled — some extreme evasions reduce recall |
+| Dataset composition | 290 curated + 990 SPDG-generated adversarial samples | Continuously expanding via SPDG |
 
 We document every limitation and encourage the community to report edge cases.`;
 }
@@ -1091,7 +1092,7 @@ Adapters: [\`benchmarks/comparison/adapters.ts\`](../benchmarks/comparison/adapt
 | Limitation | Impact |
 |---|---|
 | **English only** | Doesn't test TR/ES/DE — only the common denominator |
-| **290 samples** | Comprehensive but not exhaustive. Real-world text is more varied |
+| **1280 samples** | 290 curated + 990 SPDG adversarial. Comprehensive but not exhaustive |
 | **Self-reported** | Maintained by terlik.js team. We aim for fairness but acknowledge potential bias |
 | **Single machine** | Absolute ops/sec numbers depend on hardware. Relative ranking matters more |
 | **Default configs** | All libraries tested with default settings. Custom tuning may improve results |

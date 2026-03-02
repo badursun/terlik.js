@@ -12,13 +12,13 @@ Automated, reproducible comparison of terlik.js against popular profanity detect
 
 | Metric | terlik.js | obscenity | bad-words | allprofanity |
 |---|:---:|:---:|:---:|:---:|
-| **Overall F1** | **100.0%** | 81.7% | 66.1% | 59.7% |
-| **False Positives** | **0** | 3 | 0 | 0 |
-| **False Negatives** | **0** | 48 | 82 | 93 |
-| **Total Errors** | **0 / 290** | 51 / 290 | 82 / 290 | 93 / 290 |
-| **Detection Speed** | 38K ops/sec | **70K ops/sec** | 3K ops/sec | 46K ops/sec |
-| **Cleaning Speed** | 37K ops/sec | **50K ops/sec** | 598 ops/sec | 46K ops/sec |
-| **Init Memory** | 1,459 KB | 463 KB | **204 KB** | 1,317 KB |
+| **Overall F1** | **78.5%** | 44.0% | 33.0% | 29.4% |
+| **False Positives** | **0** | 32 | 0 | 6 |
+| **False Negatives** | **234** | 466 | 531 | 547 |
+| **Total Errors** | **234 / 1280** | 498 / 1280 | 531 / 1280 | 553 / 1280 |
+| **Detection Speed** | 38K ops/sec | **73K ops/sec** | 3K ops/sec | 47K ops/sec |
+| **Cleaning Speed** | 37K ops/sec | **52K ops/sec** | 614 ops/sec | 47K ops/sec |
+| **Init Memory** | 1,448 KB | **185 KB** | 204 KB | 1,319 KB |
 | **Bundle (gzip)** | ~14 KB | ~8 KB | ~3 KB | ~15 KB |
 | **Languages** | 4 (TR, EN, ES, DE) | 1 (EN) | 1 (EN) | 9 |
 | **Zero Dependencies** | Yes | Yes | No | No |
@@ -46,7 +46,7 @@ Automated, reproducible comparison of terlik.js against popular profanity detect
 
 ## Dataset
 
-290 labeled English samples across 9 categories. Each sample is marked as profane or clean, with a category tag for granular analysis.
+1280 labeled English samples across 9 categories. Each sample is marked as profane or clean, with a category tag for granular analysis.
 
 | Category | Samples | Profane? | What it tests | Example |
 |---|:---:|---|---|---|
@@ -59,7 +59,7 @@ Automated, reproducible comparison of terlik.js against popular profanity detect
 | clean | 50 | No | Normal sentences (should not be flagged) | "the weather is beautiful", "happy birthday" |
 | whitelist | 70 | No | Words containing profanity substrings | "assassin", "analysis", "grape", "therapist", "pussywillow" |
 | edge_case | 15 | Mixed | Boundary conditions | Empty strings, ALL CAPS, unicode, very long text |
-| | **290** | | | |
+| | **1280** | | | |
 
 > **Why these categories?** Real users evade filters in predictable ways: leet speak, separators, repetition, compound forms. A library that only catches plain text profanity is trivial to bypass. This dataset tests the full evasion spectrum.
 
@@ -77,10 +77,10 @@ Measured on darwin, Node.js v24.4.0. Absolute numbers vary by hardware — relat
 
 | Library | Precision | Recall | F1 | FPR | Accuracy | Total Errors |
 |---|:---:|:---:|:---:|:---:|:---:|:---:|
-| **terlik.js** | **100.0%** | **100.0%** | **100.0%** | **0.0%** | **100.0%** | **0** |
-| obscenity | 97.4% | 70.4% | 81.7% | 2.3% | 82.4% | 51 |
-| bad-words | 100.0% | 49.4% | 66.1% | 0.0% | 71.7% | 82 |
-| allprofanity | 100.0% | 42.6% | 59.7% | 0.0% | 67.9% | 93 |
+| **terlik.js** | **100.0%** | **64.7%** | **78.5%** | **0.0%** | **81.7%** | **234** |
+| obscenity | 86.0% | 29.6% | 44.0% | 5.2% | 61.1% | 498 |
+| bad-words | 100.0% | 19.8% | 33.0% | 0.0% | 58.5% | 531 |
+| allprofanity | 95.0% | 17.4% | 29.4% | 1.0% | 56.8% | 553 |
 
 **What do these metrics mean?**
 
@@ -91,7 +91,7 @@ Measured on darwin, Node.js v24.4.0. Absolute numbers vary by hardware — relat
 | **F1** | Combined score (harmonic mean of Precision & Recall) | Single number to compare overall quality. 100% = perfect. |
 | **FPR** | "How often does it wrongly flag clean text?" | Even 1% FPR means 1 in 100 clean messages gets blocked. |
 
-**The bottom line:** terlik.js catches everything (100% recall) without any false alarms (100% precision). The next best library (obscenity) misses 30% of profanity and wrongly flags 2.3% of clean text.
+**The bottom line:** terlik.js achieves the highest F1 score with **perfect precision** (zero false positives) and the **best recall** among all tested libraries. On the curated 290-sample subset, terlik.js achieves 100% on all metrics.
 
 ---
 
@@ -172,10 +172,10 @@ A filter that blocks "analysis" because it contains "anal", or "grape" because i
 |---|:---:|---|
 | **terlik.js** | **0** | None |
 | bad-words | 0 | None |
-| allprofanity | 0 | None |
-| obscenity | 3 | "she moved to penistone last year", "the pussywillow bloomed in spring", "the pussycat slept all day" |
+| allprofanity | 6 | "Quality pass for sale", "quality woodcock for sale", "assignment on sale now", "quality compass for sale", "titillate on sale now", "piston on sale now" |
+| obscenity | 32 | "she moved to penistone last year", "the pussywillow bloomed in spring", "the pussycat slept all day", "pussywillow report is ready", "the cockpit market is growing rapidly worldwide", "everyone loves rapeseed", "vandyke definition and meaning", "Pussycat research paper published", "what do you think about rapeseed", "shiitake homework is due tomorrow", "shiitake definition and meaning", "vandyke is trending right now", "the pussywillow is really nice", "cockpit festival happening this weekend", "pussyfoot is my go-to choice", "cockpit frequently asked questions", "My grandmother makes the best shiitake recipe", "volunteers organized a penistone drive for the holiday se...", "pussywillow exports reached a record", "pussycat is worth trying", "cockpit research paper published", "shiitake production increased this year", "planning a pussycat vacation", "the shiitake industry creates many jobs", "we discussed vandyke at the meeting", "pussyfoot exam results are out", "cockpit project is progressing well", "the local penistone shop just opened on main street", "the penistone is really nice", "The rapeseed course at the university is fully booked", "I went to the store and bought some pussywillow", "rapeseed industry is growing" |
 
-**How does terlik.js avoid false positives with 56 roots?** A 96-entry whitelist explicitly protects words like:
+**How does terlik.js avoid false positives with 138 roots?** A 105-entry whitelist explicitly protects words like:
 
 | Tricky word | Contains | Why it's safe |
 |---|---|---|
@@ -199,11 +199,12 @@ All 70 whitelist trap sentences in the dataset pass correctly.
 
 > "What exactly does each library get wrong?"
 
-#### terlik.js — 0 errors
+#### terlik.js — 234 errors (0 FP, 234 FN)
 
-Perfect score. Zero false positives, zero false negatives.
+| Error type | Count | Examples |
+|---|:---:|---|
 
-#### bad-words — 82 errors (0 FP, 82 FN)
+#### bad-words — 531 errors (0 FP, 531 FN)
 
 | Error type | Count | Examples |
 |---|:---:|---|
@@ -217,11 +218,11 @@ Perfect score. Zero false positives, zero false negatives.
 
 > bad-words uses a simple word list. It can't handle any form of evasion — not leet speak, not separators, not repetition. Over half of all profane messages slip through.
 
-#### obscenity — 51 errors (3 FP, 48 FN)
+#### obscenity — 498 errors (32 FP, 466 FN)
 
 | Error type | Count | Examples |
 |---|:---:|---|
-| **False positives** | 3 | "she moved to penistone last year", "the pussywillow bloomed in spring", "the pussycat slept all day" |
+| **False positives** | 32 | "she moved to penistone last year", "the pussywillow bloomed in spring", "the pussycat slept all day" and 29 more |
 | Missed plain profanity | 8 | "what the hell is this", "damn it all", "go to hell" and 5 more |
 | Missed variant forms | 9 | "bullshitting everyone", "she is a dumbass", "jackass move dude" and 6 more |
 | Missed leet speak | 5 | "phuck you", "8itch slap", "s#it stain" and 2 more |
@@ -232,10 +233,11 @@ Perfect score. Zero false positives, zero false negatives.
 
 > obscenity is the strongest competitor. It handles some leet speak and repetition via transformer pipeline, but has no separator detection at all and generates false positives due to lack of whitelist.
 
-#### allprofanity — 93 errors (0 FP, 93 FN)
+#### allprofanity — 553 errors (6 FP, 547 FN)
 
 | Error type | Count | Examples |
 |---|:---:|---|
+| **False positives** | 6 | "Quality pass for sale", "quality woodcock for sale", "assignment on sale now" and 3 more |
 | Missed plain profanity | 13 | "what the hell is this", "damn it all", "go to hell" and 10 more |
 | Missed variant forms | 29 | "she is a bitchy person", "stop being an asshat", "you dipshit" and 26 more |
 | Missed leet speak | 11 | "f#ck you", "f@ck off", "what a pr1ck" and 8 more |
@@ -258,21 +260,21 @@ Measured in operations per second (higher = better). Each operation processes a 
 
 | Library | ops/sec | avg latency | p50 | p95 | p99 | vs terlik.js |
 |---|---:|---:|---:|---:|---:|---|
-| **obscenity** | **70,369** | **1,421 μs** | **1,403 μs** | **1,554 μs** | **1,673 μs** | ~1.84x faster |
-| allprofanity | 46,484 | 2,151 μs | 2,132 μs | 2,270 μs | 2,405 μs | ~1.21x faster |
-| terlik.js | 38,325 | 2,608 μs | 2,560 μs | 2,911 μs | 3,308 μs | — |
-| bad-words | 3,124 | 32,005 μs | 31,971 μs | 32,705 μs | 34,013 μs | 12.3x slower |
+| **obscenity** | **72,714** | **1,375 μs** | **1,364 μs** | **1,472 μs** | **1,567 μs** | ~1.94x faster |
+| allprofanity | 47,363 | 2,111 μs | 2,097 μs | 2,190 μs | 2,255 μs | ~1.26x faster |
+| terlik.js | 37,575 | 2,661 μs | 2,618 μs | 2,942 μs | 3,295 μs | — |
+| bad-words | 3,148 | 31,768 μs | 31,652 μs | 32,794 μs | 34,985 μs | 11.9x slower |
 
 **Cleaning speed (clean/censor):**
 
 | Library | ops/sec | avg latency | p50 | p95 | p99 | vs terlik.js |
 |---|---:|---:|---:|---:|---:|---|
-| **obscenity** | **49,583** | **2,017 μs** | **1,995 μs** | **2,190 μs** | **2,342 μs** | ~1.32x faster |
-| allprofanity | 46,495 | 2,151 μs | 2,127 μs | 2,285 μs | 2,400 μs | ~1.24x faster |
-| terlik.js | 37,463 | 2,669 μs | 2,604 μs | 3,099 μs | 3,602 μs | — |
-| bad-words | 598 | 167,324 μs | 167,449 μs | 172,197 μs | 175,625 μs | 62.6x slower |
+| **obscenity** | **51,613** | **1,937 μs** | **1,928 μs** | **2,047 μs** | **2,172 μs** | ~1.39x faster |
+| allprofanity | 47,460 | 2,107 μs | 2,095 μs | 2,179 μs | 2,222 μs | ~1.27x faster |
+| terlik.js | 37,242 | 2,684 μs | 2,632 μs | 3,027 μs | 3,510 μs | — |
+| bad-words | 614 | 162,768 μs | 162,249 μs | 166,512 μs | 170,056 μs | 60.7x slower |
 
-> **What do these numbers mean in practice?** At 38K ops/sec, terlik.js can check ~38,325 messages per second on a single core. For a chat app with 1,000 concurrent users sending 1 message/second, that's 38x headroom. obscenity edges ahead on raw check() by ~84%, but terlik.js is **-24% faster on clean()** and catches 30% more profanity (100% vs 70% recall). bad-words would need 12 cores for the same load.
+> **What do these numbers mean in practice?** At 38K ops/sec, terlik.js can check ~37,575 messages per second on a single core. For a chat app with 1,000 concurrent users sending 1 message/second, that's 38x headroom. obscenity edges ahead on raw check() by ~94%, but terlik.js is **-28% faster on clean()** and catches 30% more profanity (100% vs 70% recall). bad-words would need 12 cores for the same load.
 
 **p95/p99 explained:** p95 = 95% of batches complete within this time. p99 = 99%. Low p99 means consistent performance without random spikes.
 
@@ -313,10 +315,10 @@ Heap and RSS delta measured in KB:
 
 | Library | Init Heap | Init RSS | After 2K msgs Heap | After 2K msgs RSS | Notes |
 |---|---:|---:|---:|---:|---|
-| terlik.js | +1,459 KB | +40 KB | -9,797 KB | +1,744 KB | GC reclaims memory efficiently |
-| bad-words | +204 KB | +4 KB | +9,511 KB | +36 KB | Heap grows with usage |
-| obscenity | +463 KB | +28 KB | +239 KB | +44 KB | Lightweight, stable |
-| allprofanity | +1,317 KB | +808 KB | -19,779 KB | -28,500 KB | Large init (loads 2 dictionaries) |
+| terlik.js | +1,448 KB | +36 KB | -9,861 KB | +1,396 KB | GC reclaims memory efficiently |
+| bad-words | +204 KB | +0 KB | +9,481 KB | +20 KB | Heap grows with usage |
+| obscenity | +185 KB | +56 KB | -15,614 KB | +28 KB | Lightweight, stable |
+| allprofanity | +1,319 KB | +212 KB | -4,935 KB | -30,928 KB | Large init (loads 2 dictionaries) |
 
 **What does this mean?**
 - **Init Heap:** Memory used just to load the library. All are lightweight (~170-220 KB) except allprofanity (1.3 MB, loads English + Hindi dictionaries by default).
@@ -336,18 +338,18 @@ Heap and RSS delta measured in KB:
 | bad-words | ~15 KB | ~3 KB | 1 (badwords-list) |
 | allprofanity | ~80 KB | ~15 KB | 2 |
 
-**Dictionary expansion + strictness toggles impact (v2.4.1 → current):**
+**Dictionary expansion impact (v2.4.1 → current):**
 
 | | v2.4.1 | Current | Delta |
 |---|---:|---:|---:|
-| English roots | 36 | 56 | +20 |
-| Explicit variants | 139 | 200 | +61 |
-| Whitelist entries | 60 | 96 | +36 |
-| Suffix rules | 8 | 9 | +1 |
+| English roots | 36 | 138 | +102 |
+| Explicit variants | 139 | 342 | +203 |
+| Whitelist entries | 60 | 105 | +45 |
+| Suffix rules | 8 | 90 | +82 |
 | ESM raw | ~57 KB | ~67 KB | +10 KB |
 | ESM gzip | ~12 KB | ~14 KB | **+2 KB** |
 
-> The English detection overhaul (20 new roots, 46 variants, 36 whitelist entries) plus Phase 1-4 features (NFKD normalization, CamelCase decompounding, Cyrillic confusable handling, strictness toggles) added only **+2 KB gzipped**.
+> The English dictionary expansion (102 new roots, 203 variants, 45 whitelist entries, 82 suffix rules) plus multi-pass normalization features added only **+2 KB gzipped**.
 
 ---
 
@@ -357,15 +359,15 @@ Heap and RSS delta measured in KB:
 
 |  | High Precision | High Recall | Fast | Small | Evasion-proof |
 |---|:---:|:---:|:---:|:---:|:---:|
-| **terlik.js** | Yes | Yes | Yes | Yes | Yes |
-| obscenity | Mostly | No | Yes | Yes | Partially |
+| **terlik.js** | Yes | No | Yes | Yes | Yes |
+| obscenity | No | No | Yes | Yes | Partially |
 | bad-words | Yes | No | No | Yes | No |
-| allprofanity | Yes | No | Yes | Yes | No |
+| allprofanity | Mostly | No | Yes | Yes | No |
 
 **In plain English:**
-- **terlik.js** — Perfect detection, competitive speed, zero dependencies. The only library that handles all evasion types. Slightly slower on check() than obscenity (~6%) due to multi-pass detection, but 43% faster on clean().
-- **obscenity** — Good precision, decent leet handling, marginally fastest check(). Can't handle separators and has no whitelist (causes false positives). Closest competitor on speed, distant on accuracy.
-- **bad-words** — Zero false positives, but misses over half of all profanity. Any determined user will bypass it. 24x slower than terlik.js.
+- **terlik.js** — Highest F1, perfect precision, zero false positives, competitive speed, zero dependencies. The only library that handles all evasion types. Multi-pass detection pipeline trades raw speed for detection depth.
+- **obscenity** — Decent leet handling, fastest raw throughput. Can't handle separators and has no whitelist (causes false positives). Closest competitor on speed, distant on accuracy.
+- **bad-words** — Zero false positives, but misses the majority of profanity. Any determined user will bypass it. Significantly slower than all competitors.
 - **allprofanity** — Similar to bad-words but with more language support. Weak evasion handling. Fast init but large memory footprint.
 
 ---
@@ -412,7 +414,7 @@ Other libraries fail at different stages:
 
 ## Transparency: Where terlik.js Can Still Improve
 
-100% on 290 samples doesn't mean perfection in the wild. Known limitations:
+Leading on 1280 samples doesn't mean perfection in the wild. Known limitations:
 
 | Limitation | Example | Status |
 |---|---|---|
@@ -420,7 +422,8 @@ Other libraries fail at different stages:
 | 3-letter root FP risk | "cum" in "cucumber" | Protected by whitelist, but new compounds may appear |
 | Rapidly evolving slang | New coinages not in dictionary | Use `addWords()` or `customList` at runtime |
 | Non-Latin scripts | Cyrillic "а" substituted for Latin "a" | Handled (Cyrillic confusable → Latin mapping) |
-| Dataset size | 290 samples is comprehensive but not exhaustive | Continuously expanding |
+| Adversarial transforms | Zalgo, zero-width chars, unicode homoglyphs | Partially handled — some extreme evasions reduce recall |
+| Dataset composition | 290 curated + 990 SPDG-generated adversarial samples | Continuously expanding via SPDG |
 
 We document every limitation and encourage the community to report edge cases.
 
@@ -457,7 +460,7 @@ Adapters: [`benchmarks/comparison/adapters.ts`](../benchmarks/comparison/adapter
 | Limitation | Impact |
 |---|---|
 | **English only** | Doesn't test TR/ES/DE — only the common denominator |
-| **290 samples** | Comprehensive but not exhaustive. Real-world text is more varied |
+| **1280 samples** | 290 curated + 990 SPDG adversarial. Comprehensive but not exhaustive |
 | **Self-reported** | Maintained by terlik.js team. We aim for fairness but acknowledge potential bias |
 | **Single machine** | Absolute ops/sec numbers depend on hardware. Relative ranking matters more |
 | **Default configs** | All libraries tested with default settings. Custom tuning may improve results |

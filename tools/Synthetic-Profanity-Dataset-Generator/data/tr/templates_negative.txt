@@ -1,17 +1,73 @@
 # Negatif (clean) template'ler — Türkçe
 # {word} placeholder ile kök kelime yerleştirilir
+
+# === ALIŞVERİŞ / ÜRÜN ===
 bugün {word} aldım
-{word} konusu hakkında
-{word} ile ilgili bir yazı
-bu {word} çok güzel
 {word} fiyatları ne kadar
 {word} satışa çıkmış
 yeni {word} modeli
+{word} sipariş ettim
+{word} mağazası nerede
+en iyi {word} markası
+{word} çeşitleri
+{word} indirimi başlamış
+
+# === BİLGİ / SORU ===
+{word} konusu hakkında
+{word} ile ilgili bir yazı
 {word} hakkında bilgi
 {word} nasıl kullanılır
 {word} nedir
+{word} ne demek
+{word} nasıl yapılır
+{word} hakkında ne biliyorsun
+{word} ile ilgili araştırma yapıyorum
+
+# === GÜNLÜK HAYAT ===
+bu {word} çok güzel
 o {word} harika
-{word} çeşitleri
-en iyi {word} markası
-{word} sipariş ettim
-{word} mağazası nerede
+{word} bugün taze gelmiş
+{word} çok lezzetli olmuş
+dün {word} gördüm
+{word} çok meşhur
+{word} tavsiye ederim
+{word} almayı düşünüyorum
+{word} baya iyi
+
+# === İŞ / EĞİTİM ===
+{word} raporunu hazırladım
+toplantıda {word} konuştuk
+{word} projesi ilerliyor
+{word} sunumunu yaptım
+{word} ödevini bitirdim
+{word} sınavı vardı bugün
+{word} dersine girdim
+{word} hakkında makale okudum
+{word} konferansına katıldım
+
+# === HABER / BİLGİ AKTARIMI ===
+{word} haberleri çıktı
+{word} festivali bu yıl da var
+{word} sezonu başladı
+{word} rekoru kırıldı
+{word} sektörü büyüyor
+{word} teknolojisi gelişiyor
+{word} ihracatı arttı
+
+# === SOSYAL / SOHBET ===
+{word} konusunu ele alacağız
+{word} hakkında ne düşünüyorsun
+{word} gördün mü
+{word} biliyor musun
+{word} duymuşsundur
+{word} denemeni öneririm
+{word} çok tutuldu son zamanlarda
+{word} herkeste var artık
+
+# === DOĞA / GEZİ ===
+{word} çok güzel bir yer
+{word} manzarası harika
+{word} tatili planı yapıyoruz
+{word} gezisi çok keyifliydi
+{word} doğası muhteşem
+{word} parkına gittik

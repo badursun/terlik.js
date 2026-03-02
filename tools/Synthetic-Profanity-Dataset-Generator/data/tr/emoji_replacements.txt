@@ -1,5 +1,5 @@
 # Emoji replacements — harfler arası emoji ekleme
-# Format: emoji
+# Format: emoji (her satırda bir tane)
 🤬
 💩
 🖕
@@ -15,3 +15,14 @@
 🚫
 💢
 😈
+🤡
+🐒
+🐷
+🐍
+🤢
+💀
+☠️
+🧠
+🚽
+🪳
+🤏
