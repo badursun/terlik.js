@@ -15,6 +15,54 @@
         "types": "./dist/index.d.ts",
         "default": "./dist/index.js"
       }
+    },
+    "./tr": {
+      "import": {
+        "types": "./dist/lang/tr/index.d.mts",
+        "default": "./dist/lang/tr/index.mjs"
+      },
+      "require": {
+        "types": "./dist/lang/tr/index.d.ts",
+        "default": "./dist/lang/tr/index.js"
+      }
+    },
+    "./en": {
+      "import": {
+        "types": "./dist/lang/en/index.d.mts",
+        "default": "./dist/lang/en/index.mjs"
+      },
+      "require": {
+        "types": "./dist/lang/en/index.d.ts",
+        "default": "./dist/lang/en/index.js"
+      }
+    },
+    "./es": {
+      "import": {
+        "types": "./dist/lang/es/index.d.mts",
+        "default": "./dist/lang/es/index.mjs"
+      },
+      "require": {
+        "types": "./dist/lang/es/index.d.ts",
+        "default": "./dist/lang/es/index.js"
+      }
+    },
+    "./de": {
+      "import": {
+        "types": "./dist/lang/de/index.d.mts",
+        "default": "./dist/lang/de/index.mjs"
+      },
+      "require": {
+        "types": "./dist/lang/de/index.d.ts",
+        "default": "./dist/lang/de/index.js"
+      }
+    }
+  },
+  "typesVersions": {
+    "*": {
+      "tr": ["./dist/lang/tr/index.d.ts"],
+      "en": ["./dist/lang/en/index.d.ts"],
+      "es": ["./dist/lang/es/index.d.ts"],
+      "de": ["./dist/lang/de/index.d.ts"]
     }
   },
   "files": [

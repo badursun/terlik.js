@@ -1,4 +1,5 @@
 export { Terlik } from "./terlik.js";
+export { TerlikCore } from "./core.js";
 export { normalize, createNormalizer } from "./normalizer.js";
 export type { NormalizerConfig } from "./normalizer.js";
 export { levenshteinDistance, levenshteinSimilarity, diceSimilarity } from "./fuzzy.js";
