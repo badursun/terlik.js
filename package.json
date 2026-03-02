@@ -76,6 +76,7 @@
     "bench": "tsx benchmarks/bench.ts",
     "bench:accuracy": "tsx benchmarks/accuracy.ts",
     "bench:compare": "cd benchmarks/comparison && pnpm install && pnpm start",
+    "bench:report": "cd benchmarks/comparison && pnpm install && pnpm start",
     "typecheck": "tsc --noEmit",
     "dev:live": "tsx watch tools/server.ts",
     "prepare": "husky"

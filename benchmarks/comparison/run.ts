@@ -12,6 +12,7 @@ import { dataset, throughputCorpus } from "./dataset.js";
 import { runAccuracy, type AccuracyResult } from "./accuracy.js";
 import { runThroughput, type ThroughputResult } from "./throughput.js";
 import { runMemory, type MemoryResult } from "./memory.js";
+import { generateReport } from "./generate-report.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -244,6 +245,10 @@ async function main(): Promise<void> {
   const outPath = join(resultsDir, "comparison-results.json");
   writeFileSync(outPath, JSON.stringify(output, null, 2));
   console.log(`Results saved to ${outPath}`);
+  console.log();
+
+  // Generate markdown report
+  generateReport(output);
   console.log();
   console.log("=".repeat(70));
   console.log("  BENCHMARK COMPLETE");
