@@ -164,22 +164,16 @@ describe("EN adversarial", () => {
     }
   });
 
-  // ── 8. Compound/creative evasion ──
+  // ── 8. Compound evasion — FIXED by dictionary variants ──
   describe("compound evasion", () => {
-    const compounds = [
-      { input: "fuckwad", desc: "fuckwad" },
-      { input: "shitlord", desc: "shitlord" },
-      { input: "cockwomble", desc: "cockwomble" },
-      { input: "twatwaffle", desc: "twatwaffle" },
-      { input: "assmunch", desc: "assmunch" },
-      { input: "cumguzzler", desc: "cumguzzler" },
-      { input: "dickweasel", desc: "dickweasel" },
+    const compoundsDetected = [
+      "fuckwad", "shitlord", "cockwomble", "twatwaffle",
+      "assmunch", "cumguzzler", "dickweasel",
     ];
 
-    for (const { input, desc } of compounds) {
-      it(`compound: ${desc}`, () => {
-        const result = en.containsProfanity(input);
-        console.log(`[AUDIT] compound "${desc}" → detected=${result}`);
+    for (const word of compoundsDetected) {
+      it(`detects compound: ${word}`, () => {
+        expect(en.containsProfanity(word)).toBe(true);
       });
     }
   });
@@ -209,29 +203,25 @@ describe("EN adversarial", () => {
 
   // ── 10. Boundary edge cases ──
   describe("boundary attacks", () => {
-    it("profanity as URL path: example.com/fuck", () => {
-      const result = en.containsProfanity("visit example.com/fuck");
-      console.log(`[AUDIT] URL path → detected=${result}`);
+    it("detects profanity in URL path: example.com/fuck", () => {
+      expect(en.containsProfanity("visit example.com/fuck")).toBe(true);
     });
-    it("profanity in email: fuck@email.com", () => {
-      const result = en.containsProfanity("email fuck@email.com");
-      console.log(`[AUDIT] email → detected=${result}`);
+    it("detects profanity in email: fuck@email.com", () => {
+      expect(en.containsProfanity("email fuck@email.com")).toBe(true);
     });
-    it("profanity with trailing number: fuck123", () => {
+    it("profanity with trailing number: fuck123 — KNOWN FN (digits in WORD_CHAR)", () => {
+      // Digit boundary split deferred to avoid breaking leet detection
       const result = en.containsProfanity("fuck123");
       console.log(`[AUDIT] trailing number → detected=${result}`);
     });
-    it("profanity in CamelCase: FuckYou", () => {
-      const result = en.containsProfanity("FuckYou");
-      console.log(`[AUDIT] CamelCase → detected=${result}`);
+    it("detects profanity in CamelCase: FuckYou", () => {
+      expect(en.containsProfanity("FuckYou")).toBe(true);
     });
-    it("profanity hyphenated: mother-fucker", () => {
-      const result = en.containsProfanity("mother-fucker");
-      console.log(`[AUDIT] hyphenated → detected=${result}`);
+    it("detects profanity hyphenated: mother-fucker", () => {
+      expect(en.containsProfanity("mother-fucker")).toBe(true);
     });
-    it("profanity in hashtag: #fuckyou", () => {
-      const result = en.containsProfanity("#fuckyou");
-      console.log(`[AUDIT] hashtag → detected=${result}`);
+    it("detects profanity in hashtag: #fuckyou", () => {
+      expect(en.containsProfanity("#fuckyou")).toBe(true);
     });
   });
 });

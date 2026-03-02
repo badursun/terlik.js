@@ -167,6 +167,19 @@ export class Detector {
     if (normalizedText !== lowerText && normalizedText.length > 0) {
       this.runPatterns(normalizedText, text, whitelist, results, true);
     }
+
+    // Third pass: decompound CamelCase boundaries (FuckYou → Fuck You,
+    // SHITlord → SHIT lord). Not in normalizer to avoid breaking Turkish
+    // mixed-case like sIktIr where I→ı in TR locale.
+    const decompound = text
+      .replace(/([a-z])([A-Z])/g, "$1 $2")
+      .replace(/([A-Z]{2,})([a-z])/g, "$1 $2");
+    if (decompound !== text) {
+      const decompoundNorm = this.normalizeFn(decompound);
+      if (decompoundNorm !== normalizedText && decompoundNorm !== lowerText) {
+        this.runPatterns(decompoundNorm, text, whitelist, results, true);
+      }
+    }
   }
 
   private runPatterns(

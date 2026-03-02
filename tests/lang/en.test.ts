@@ -109,6 +109,12 @@ describe("English profanity detection", () => {
       "tits", "titty", "titties",
       "vaginas", "vaginal",
       "raped", "raping", "rapist", "rapists",
+      // Compound variants
+      "fuckyou", "fuckoff", "fuckwad", "fuckup", "fuckall",
+      "shitlord", "shitstain", "shitbrain",
+      "cockwomble", "twatwaffle", "assmunch",
+      "cumguzzler", "cumdumpster", "dickweasel",
+      "thundercunt",
     ];
 
     for (const v of variants) {
@@ -163,6 +169,36 @@ describe("English profanity detection", () => {
     it("detects combined: n!66er", () => {
       expect(terlik.containsProfanity("n!66er")).toBe(true);
     });
+
+    // CamelCase compound detection
+    it("detects CamelCase: FuckYou", () => {
+      expect(terlik.containsProfanity("FuckYou")).toBe(true);
+    });
+
+    it("detects CamelCase: ShitHead", () => {
+      expect(terlik.containsProfanity("ShitHead")).toBe(true);
+    });
+
+    it("detects ALLCAPS+lower: SHITlord", () => {
+      expect(terlik.containsProfanity("SHITlord")).toBe(true);
+    });
+
+    it("detects hashtag compound: #fuckyou", () => {
+      expect(terlik.containsProfanity("#fuckyou")).toBe(true);
+    });
+
+    // Accented / Cyrillic / fullwidth bypass detection
+    it("detects accented bypass: fück", () => {
+      expect(terlik.containsProfanity("f\u00FCck")).toBe(true);
+    });
+
+    it("detects Cyrillic bypass: fuсk", () => {
+      expect(terlik.containsProfanity("fu\u0441k")).toBe(true);
+    });
+
+    it("detects fullwidth: ｆｕｃｋ", () => {
+      expect(terlik.containsProfanity("\uFF46\uFF55\uFF43\uFF4B")).toBe(true);
+    });
   });
 
   describe("whitelist — false positive prevention", () => {
@@ -193,6 +229,8 @@ describe("English profanity detection", () => {
       "grape", "drape", "scrape", "rapeseed",
       "therapist", "therapy",
       "title", "titan", "titillate",
+      // CamelCase FP checks — must not flag legitimate camelCase
+      "JavaScript", "CockpitDoor", "AssessmentReport",
     ];
 
     for (const word of safeWords) {

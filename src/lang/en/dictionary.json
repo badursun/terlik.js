@@ -4,21 +4,21 @@
   "entries": [
     {
       "root": "fuck",
-      "variants": ["fucking", "fucker", "fucked", "fuckers", "fucks", "fck", "fuk", "fuking", "fcking", "stfu", "motherfucker", "motherfucking", "fuckface", "fuckwit", "clusterfuck", "mindfuck", "fuckboy", "fucktard", "fuckhead", "wtf", "mofo", "unfucking", "fuckery"],
+      "variants": ["fucking", "fucker", "fucked", "fuckers", "fucks", "fck", "fuk", "fuking", "fcking", "stfu", "motherfucker", "motherfucking", "fuckface", "fuckwit", "clusterfuck", "mindfuck", "fuckboy", "fucktard", "fuckhead", "wtf", "mofo", "unfucking", "fuckery", "fuckyou", "fuckoff", "fuckwad", "fuckup", "fuckall"],
       "severity": "high",
       "category": "sexual",
       "suffixable": true
     },
     {
       "root": "shit",
-      "variants": ["shitty", "bullshit", "shitting", "sht", "shits", "shite", "shithead", "shitstorm", "dipshit", "horseshit", "batshit", "apeshit", "shithole", "shitface", "shitshow", "shitbag", "shitload", "shithouse", "shitlist", "shitfaced"],
+      "variants": ["shitty", "bullshit", "shitting", "sht", "shits", "shite", "shithead", "shitstorm", "dipshit", "horseshit", "batshit", "apeshit", "shithole", "shitface", "shitshow", "shitbag", "shitload", "shithouse", "shitlist", "shitfaced", "shitlord", "shitstain", "shitbrain"],
       "severity": "high",
       "category": "general",
       "suffixable": true
     },
     {
       "root": "ass",
-      "variants": ["asses", "arse", "arses", "asshat", "asswipe", "smartass", "dumbass", "fatass", "badass", "jackass", "lardass", "kickass", "asscrack", "assclown"],
+      "variants": ["asses", "arse", "arses", "asshat", "asswipe", "smartass", "dumbass", "fatass", "badass", "jackass", "lardass", "kickass", "asscrack", "assclown", "assmunch"],
       "severity": "medium",
       "category": "insult",
       "suffixable": false
@@ -46,21 +46,21 @@
     },
     {
       "root": "dick",
-      "variants": ["dickhead", "dickheads", "dicks", "dickwad", "dickweed"],
+      "variants": ["dickhead", "dickheads", "dicks", "dickwad", "dickweed", "dickweasel"],
       "severity": "medium",
       "category": "sexual",
       "suffixable": false
     },
     {
       "root": "cock",
-      "variants": ["cocks", "cocksucker", "cocksucking", "cockhead", "cockblock"],
+      "variants": ["cocks", "cocksucker", "cocksucking", "cockhead", "cockblock", "cockwomble"],
       "severity": "high",
       "category": "sexual",
       "suffixable": false
     },
     {
       "root": "cunt",
-      "variants": ["cunts", "cunty"],
+      "variants": ["cunts", "cunty", "thundercunt"],
       "severity": "high",
       "category": "sexual",
       "suffixable": true
@@ -95,7 +95,7 @@
     },
     {
       "root": "twat",
-      "variants": ["twats"],
+      "variants": ["twats", "twatwaffle"],
       "severity": "high",
       "category": "sexual",
       "suffixable": true
@@ -354,7 +354,7 @@
     },
     {
       "root": "cum",
-      "variants": ["cumming", "cummed", "cumshot", "cumshots"],
+      "variants": ["cumming", "cummed", "cumshot", "cumshots", "cumguzzler", "cumdumpster"],
       "severity": "high",
       "category": "sexual",
       "suffixable": false
