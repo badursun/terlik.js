@@ -33,7 +33,7 @@ jobs:
         run: pnpm typecheck
 
       - name: Test with coverage
-        run: pnpm test -- --coverage
+        run: pnpm test -- --coverage --pool=forks --poolOptions.forks.maxForks=1
         env:
           NODE_OPTIONS: --max-old-space-size=4096
 
