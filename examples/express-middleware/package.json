@@ -1,0 +1,16 @@
+{
+  "name": "terlik-express-example",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Express middleware example for terlik.js profanity detection",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.21.0",
+    "terlik.js": "latest"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
