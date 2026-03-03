@@ -328,16 +328,16 @@ Benchmark results (Apple Silicon, single core, msgs/sec):
 
 ### vs Alternatives (English corpus)
 
-Head-to-head comparison on a **1280-sample English corpus** (290 curated + 990 SPDG-generated adversarial samples) covering plain text, variants, leet speak, separator evasion, char repetition, combined evasion, false-positive traps, edge cases, and synthetic adversarial patterns (zalgo, zero-width chars, unicode homoglyphs, reverse, vowel drop). All libraries tested with default settings.
+Head-to-head comparison on a **1281-sample English corpus** (290 curated + 991 SPDG-generated adversarial samples) covering plain text, variants, leet speak, separator evasion, char repetition, combined evasion, false-positive traps, edge cases, and synthetic adversarial patterns (zalgo, zero-width chars, unicode homoglyphs, reverse, vowel drop). All libraries tested with default settings.
 
 | Library | F1 | Precision | Recall | FPR | check() ops/sec | clean() ops/sec |
 |---|---|---|---|---|---|---|
-| **terlik.js** | **78.5%** | **100.0%** | **64.7%** | **0.0%** | 38K | 37K |
-| obscenity | 44.0% | 86.0% | 29.6% | 5.2% | **73K** | **52K** |
-| bad-words | 33.0% | 100.0% | 19.8% | 0.0% | 3K | 614 |
-| allprofanity | 29.4% | 95.0% | 17.4% | 1.0% | 47K | 47K |
+| **terlik.js** | **81.0%** | **100.0%** | **68.1%** | **0.0%** | 37K | 36K |
+| obscenity | 42.9% | 83.8% | 28.9% | 6.0% | **70K** | **48K** |
+| bad-words | 32.2% | 100.0% | 19.2% | 0.0% | 3K | 607 |
+| allprofanity | 28.7% | 89.7% | 17.1% | 2.1% | 47K | 47K |
 
-On the **curated 290-sample subset**, terlik.js achieves **100% F1** — perfect precision, perfect recall, zero false positives. The overall F1 of 78.5% reflects intentionally adversarial SPDG samples (zalgo text, zero-width chars, unicode homoglyphs) that stress-test detection boundaries. terlik.js **still leads by 34+ F1 points** over every competitor. See [full methodology, per-category breakdown, and limitations](./docs/benchmark-comparison.md).
+On the **curated 290-sample subset**, terlik.js achieves **100% F1** — perfect precision, perfect recall, zero false positives. The overall F1 of 81.0% reflects intentionally adversarial SPDG samples (zalgo text, zero-width chars, unicode homoglyphs) that stress-test detection boundaries. terlik.js **still leads by 38+ F1 points** over every competitor. See [full methodology, per-category breakdown, and limitations](./docs/benchmark-comparison.md).
 
 > **Throughput note:** The multi-pass detection pipeline (NFKD, Cyrillic confusable mapping, CamelCase decompounding) costs ~17% vs a naive single-pass approach — this is what enables the highest recall among all tested libraries. Optional toggles (`disableLeetDecode`, `disableCompound`) can recover ~5-8% for controlled inputs. Safety layers (NFKD, diacritics, Cyrillic) are always active. See [full toggle guide](./docs/benchmark-comparison.md#where-does-the-throughput-go).
 >
