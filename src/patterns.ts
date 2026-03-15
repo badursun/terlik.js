@@ -9,7 +9,7 @@ const SEPARATOR = `[^${WORD_CHAR}]{0,3}`;
 const WORD_BOUNDARY_BEHIND = `(?<![${WORD_CHAR}])`;
 const WORD_BOUNDARY_AHEAD = `(?![${WORD_CHAR}])`;
 
-const MAX_PATTERN_LENGTH = 10000;
+const MAX_PATTERN_LENGTH = 20000;
 const MAX_SUFFIX_CHAIN = 2;
 
 /** Safety timeout (ms) for regex execution in detection loops. */

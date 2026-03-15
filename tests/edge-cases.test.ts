@@ -37,8 +37,8 @@ describe("edge cases", () => {
       expect(terlik.containsProfanity("ama yapamam")).toBe(false);
     });
 
-    it("does not flag 'ami' (whitelisted)", () => {
-      expect(terlik.containsProfanity("ami sorunu")).toBe(false);
+    it("flags 'ami' (am variant)", () => {
+      expect(terlik.containsProfanity("ami sorunu")).toBe(true);
     });
 
     it("does not flag 'amen'", () => {

@@ -1,7 +1,7 @@
 const VALID_SEVERITIES = ["high", "medium", "low"];
 const VALID_CATEGORIES = ["sexual", "insult", "slur", "general"];
-const MAX_SUFFIXES = 100;
-const SUFFIX_PATTERN = /^[a-z]{1,10}$/;
+const MAX_SUFFIXES = 150;
+const SUFFIX_PATTERN = /^[\p{Ll}]{1,10}$/u;
 
 /** Raw dictionary data structure as loaded from JSON. */
 export interface DictionaryData {
@@ -48,7 +48,7 @@ export function validateDictionary(data: unknown): DictionaryData {
   for (const suffix of d.suffixes) {
     if (typeof suffix !== "string" || !SUFFIX_PATTERN.test(suffix)) {
       throw new Error(
-        `Invalid suffix "${suffix}": must be 1-10 lowercase letters [a-z]`,
+        `Invalid suffix "${suffix}": must be 1-10 lowercase Unicode letters`,
       );
     }
   }

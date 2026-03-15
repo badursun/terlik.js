@@ -87,8 +87,8 @@ describe("suffix engine", () => {
       expect(terlik.containsProfanity("ama neden")).toBe(false);
     });
 
-    it("does not false-positive on 'ami' (am is non-suffixable)", () => {
-      expect(terlik.containsProfanity("ami bozuk")).toBe(false);
+    it("detects 'ami' (am + i variant)", () => {
+      expect(terlik.containsProfanity("ami bozuk")).toBe(true);
     });
   });
 
@@ -97,8 +97,8 @@ describe("suffix engine", () => {
       expect(terlik.containsProfanity("ama ben istemiyorum")).toBe(false);
     });
 
-    it("does not flag 'ami'", () => {
-      expect(terlik.containsProfanity("ami problemi var")).toBe(false);
+    it("flags 'ami' (am variant)", () => {
+      expect(terlik.containsProfanity("ami problemi var")).toBe(true);
     });
 
     it("does not flag 'amen'", () => {

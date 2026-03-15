@@ -164,7 +164,7 @@ describe("validateDictionary rejection", () => {
   });
 
   it("rejects too many suffixes", () => {
-    const suffixes = Array.from({ length: 101 }, (_, i) => `s${String(i).padStart(2, "0")}`.slice(0, 3));
+    const suffixes = Array.from({ length: 151 }, (_, i) => `suf${String.fromCharCode(97 + (i % 26))}${String.fromCharCode(97 + Math.floor(i / 26))}`);
     expect(() =>
       validateDictionary({
         version: 1,

@@ -22,27 +22,31 @@
     "ken", "esi",
     "un", "lari", "leri", "larin", "lerin",
     "misin", "misiniz", "musun", "musunuz", "miyim", "miyiz",
-    "cesine", "casina"
+    "cesine", "casina",
+    "ım", "üm", "ın", "ün", "ü",
+    "ımı", "ümü", "ını", "ünü",
+    "ıma", "üme", "ına", "üne",
+    "ımız", "ümüz", "ınız", "ünüz",
+    "ımıza", "ümüze", "ınıza", "ünüze",
+    "ımızı", "ümüzü", "ınızı", "ünüzü",
+    "iniz", "imiz", "unuz", "ümüz"
   ],
   "entries": [
     {
       "root": "sik",
       "variants": [
-        "siktir", "sikicem", "siktim", "sikeyim", "sikik",
-        "sikim", "sikis",
-        "sike", "siken", "siker", "sikti", "sikmis", "sikmek",
-        "sikecek", "sikiyor", "sikme", "sikici", "siksin",
+        "siktir",
         "sikimsonik",
         "siktiğimin", "siktirmişcesine",
         "sktr",
         "sikişse", "sikişecek", "sikişen", "sikişme", "sikişmek",
         "sikeceğim",
-        "sikilecek", "sikiler",
+        "sikilecek",
         "siktiğim", "siktimin"
       ],
       "severity": "high",
       "category": "sexual",
-      "suffixable": false
+      "suffixable": true
     },
     {
       "root": "amk",
@@ -80,7 +84,8 @@
       "variants": [
         "yarak", "yarrak", "yarakli", "dalyarak", "dalyarrak",
         "yarrani", "yarragimi", "yarragini",
-        "yarram", "yrrk", "yrk", "yarrakkafalı", "yarrağımıye", "yarramıye"
+        "yarram", "yrrk", "yrk", "yarrakkafalı", "yarrağımıye", "yarramıye",
+        "yarrağ", "yarağ"
       ],
       "severity": "high",
       "category": "sexual",
@@ -96,18 +101,18 @@
       ],
       "severity": "high",
       "category": "sexual",
-      "suffixable": false
+      "suffixable": true
     },
     {
       "root": "am",
-      "variants": ["amcik", "amcuk"],
+      "variants": ["amcik", "amcuk", "amı", "ami"],
       "severity": "high",
       "category": "sexual",
-      "suffixable": false
+      "suffixable": true
     },
     {
       "root": "taşak",
-      "variants": ["tasak", "tassak", "tassakli", "taşağımıye", "daltaşak"],
+      "variants": ["tasak", "tassak", "tassakli", "taşağımıye", "daltaşak", "taşağ", "tasag"],
       "severity": "medium",
       "category": "sexual",
       "suffixable": true
@@ -1154,7 +1159,6 @@
     "dolma",
     "dolmus",
     "ama",
-    "ami",
     "amen",
     "amir",
     "amil",
@@ -1174,6 +1178,9 @@
     "sıkıştır",
     "sıkıştırma",
     "sıkışmış",
+    "sıkıntı", "sıkıntılı", "sıkıntısız",
+    "sıkma", "sıkmak", "sıkılmak",
+    "sıkı", "sıkıyönetim", "sıkılaşma",
     "sikkeleri",
     "domuzderisi",
     "domuzeti",
