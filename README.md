@@ -570,6 +570,18 @@ See [CONTRIBUTING.md](./CONTRIBUTING.md) for contribution guidelines.
 
 See [CHANGELOG.md](./CHANGELOG.md) for the full version history.
 
+## Ports
+
+The terlik detection engine has been ported to other languages by the community:
+
+| Language | Repository | Status |
+|---|---|---|
+| **Go** | [KilimcininKorOglu/terlik.go](https://github.com/KilimcininKorOglu/terlik.go) | Active |
+| **PHP** | [KilimcininKorOglu/terlik.php](https://github.com/KilimcininKorOglu/terlik.php) | Active |
+| **Python** | *Coming soon* | Planned |
+
+> **Want to port terlik to another language?** The core algorithm (normalization pipeline + suffix engine + pattern matching) is language-agnostic. See [How It Works](#how-it-works) for the detection architecture.
+
 ## License
 
 MIT
