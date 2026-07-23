@@ -84,6 +84,16 @@ export class Detector {
     }
   }
 
+  private tokenizeWithOffsets(text: string): Array<{ word: string; start: number }> {
+    const tokens: Array<{ word: string; start: number }> = [];
+    const regex = /\S+/g;
+    let match: RegExpExecArray | null;
+    while ((match = regex.exec(text)) !== null) {
+      tokens.push({ word: match[0], start: match.index });
+    }
+    return tokens;
+  }
+
   getPatterns(): Map<string, RegExp> {
     const map = new Map<string, RegExp>();
     for (const p of this.ensureCompiled()) {
@@ -133,22 +143,14 @@ export class Detector {
     whitelist: Set<string>,
     results: MatchResult[],
   ): void {
-    const normalized = this.normalizeFn(text);
-    const words = normalized.split(/\s+/);
-    const originalWords = text.split(/\s+/);
-
-    let charIndex = 0;
-    for (let wi = 0; wi < originalWords.length; wi++) {
-      const origWord = originalWords[wi];
-      const normWord = wi < words.length ? words[wi] : "";
-
+    const tokens = this.tokenizeWithOffsets(text);
+    for (const token of tokens) {
+      const normWord = this.normalizeFn(token.word);
       if (normWord.length === 0) {
-        charIndex += origWord.length + 1;
         continue;
       }
 
       if (whitelist.has(normWord)) {
-        charIndex += origWord.length + 1;
         continue;
       }
 
@@ -157,17 +159,15 @@ export class Detector {
         const entry = this.dictionary.findRootForWord(dictWord);
         if (entry) {
           results.push({
-            word: origWord,
+            word: token.word,
             root: entry.root,
-            index: charIndex,
+            index: token.start,
             severity: entry.severity,
             category: entry.category as Category | undefined,
             method: "exact",
           });
         }
       }
-
-      charIndex += origWord.length + 1;
     }
   }
 
@@ -329,22 +329,17 @@ export class Detector {
     threshold: number,
     algorithm: "levenshtein" | "dice",
   ): void {
-    const normalized = this.normalizeFn(text);
-    const normWords = normalized.split(/\s+/);
-    const origWords = text.split(/\s+/);
+    const tokens = this.tokenizeWithOffsets(text);
     const matcher = getFuzzyMatcher(algorithm);
     const existingIndices = new Set(existingResults.map((r) => r.index));
     const startTime = Date.now();
 
-    let charIndex = 0;
-    for (let wi = 0; wi < origWords.length; wi++) {
+    for (const token of tokens) {
       if (Date.now() - startTime > REGEX_TIMEOUT_MS) break;
 
-      const origWord = origWords[wi];
-      const word = wi < normWords.length ? normWords[wi] : "";
+      const word = this.normalizeFn(token.word);
 
       if (word.length < 3 || whitelist.has(word)) {
-        charIndex += origWord.length + 1;
         continue;
       }
 
@@ -353,26 +348,24 @@ export class Detector {
 
         const similarity = matcher(word, normDict);
         if (similarity >= threshold) {
-          if (!existingIndices.has(charIndex)) {
+          if (!existingIndices.has(token.start)) {
             const dictWord = this.normalizedWordToRoot.get(normDict)!;
             const entry = this.dictionary.findRootForWord(dictWord);
             if (entry) {
               existingResults.push({
-                word: origWord,
+                word: token.word,
                 root: entry.root,
-                index: charIndex,
+                index: token.start,
                 severity: entry.severity,
                 category: entry.category as Category | undefined,
                 method: "fuzzy",
               });
-              existingIndices.add(charIndex);
+              existingIndices.add(token.start);
             }
           }
           break;
         }
       }
-
-      charIndex += origWord.length + 1;
     }
   }
 
