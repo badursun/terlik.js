@@ -1,0 +1,963 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>terlik.js — Profanity filtering that catches the tricks</title>
+<meta name="description" content="A fast, zero-dependency, multilingual profanity detection engine. Turkish-first, ships with TR · EN · ES · DE. Catches leet speak, separators, repetition and suffix forms.">
+<meta name="theme-color" content="#0b0908">
+<meta property="og:type" content="website">
+<meta property="og:title" content="terlik.js — Profanity filtering that catches the tricks">
+<meta property="og:description" content="Zero-dependency, multilingual profanity detection engine. Turkish-first. Try it live in your browser.">
+<meta property="og:image" content="https://badursun.github.io/terlik.js/assets/og-image.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" type="image/png" href="assets/icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@500;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0b0908; --bg-2:#110e0c; --surface:#161210; --surface-2:#1d1815; --line:#2b231e; --line-2:#3a2f28;
+  --text:#f1ebe4; --muted:#968a80; --dim:#62574f;
+  --orange:#ff6b1a; --orange-2:#ff8a3d; --ember:#ffb347; --orange-dim:rgba(255,107,26,.14);
+  --ok:#8fd694; --danger:#ff5a3c;
+  --sans:"Sora",system-ui,-apple-system,Segoe UI,sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  --radius:14px; --wrap:1180px;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--text);font-family:var(--sans);line-height:1.6;overflow-x:hidden}
+a{color:inherit}
+::selection{background:var(--orange);color:#140a04}
+.wrap{max-width:var(--wrap);margin:0 auto;padding:0 24px}
+.mono{font-family:var(--mono)}
+.accent{color:var(--orange)}
+/* grain + glow */
+body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:100;opacity:.07;mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+.eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.22em;text-transform:uppercase;color:var(--orange);display:inline-flex;align-items:center;gap:12px}
+.eyebrow::after{content:"";width:40px;height:1px;background:var(--orange);opacity:.6}
+.comment{font-family:var(--mono);color:var(--dim)}
+
+/* ── nav ── */
+nav{position:sticky;top:0;z-index:50;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);background:rgba(11,9,8,.72);border-bottom:1px solid transparent;transition:border-color .3s}
+nav.scrolled{border-bottom-color:var(--line)}
+nav .wrap{display:flex;align-items:center;height:64px;gap:28px}
+.logo{font-weight:800;font-size:20px;text-decoration:none;letter-spacing:-.02em;display:flex;align-items:center;gap:10px}
+.logo img{width:26px;height:26px;border-radius:6px}
+.logo b{color:var(--orange)}
+nav ul{display:flex;gap:26px;list-style:none;margin:0 0 0 auto;padding:0}
+nav ul a{text-decoration:none;font-family:var(--mono);font-size:13px;color:var(--muted);transition:color .2s}
+nav ul a:hover{color:var(--text)}
+.btn{display:inline-flex;align-items:center;gap:10px;font-family:var(--mono);font-size:14px;font-weight:500;padding:12px 20px;border-radius:10px;text-decoration:none;border:1px solid var(--line-2);background:var(--surface);color:var(--text);cursor:pointer;transition:transform .15s,border-color .2s,background .2s,box-shadow .2s}
+.btn:hover{border-color:var(--orange);transform:translateY(-1px)}
+.btn.primary{background:var(--orange);border-color:var(--orange);color:#160b04;font-weight:700;box-shadow:0 8px 30px -8px rgba(255,107,26,.7)}
+.btn.primary:hover{background:var(--orange-2)}
+.btn.small{padding:8px 14px;font-size:12px}
+.btn svg{width:16px;height:16px}
+
+/* ── hero ── */
+.hero{position:relative;min-height:calc(100vh - 64px);display:flex;align-items:center;padding:40px 0 30px;overflow:hidden}
+.hero::before{content:"";position:absolute;inset:0;background:
+  radial-gradient(900px 520px at 72% 48%,rgba(255,107,26,.16),transparent 60%),
+  radial-gradient(600px 400px at 10% 90%,rgba(255,107,26,.06),transparent 70%);pointer-events:none}
+.hero::after{content:"";position:absolute;left:0;right:0;bottom:0;height:160px;background:linear-gradient(transparent,var(--bg));pointer-events:none}
+#embers{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:1}
+.hero .wrap{position:relative;z-index:2;display:grid;grid-template-columns:1.05fr 1fr;gap:30px;align-items:center;width:100%}
+.hero h1{font-size:clamp(64px,10vw,128px);font-weight:800;letter-spacing:-.05em;line-height:.95;margin:22px 0 22px;text-shadow:0 0 60px rgba(255,107,26,.15)}
+.hero h1 b{color:var(--orange);font-weight:800}
+.hero h2{font-family:var(--mono);font-weight:500;font-size:clamp(22px,2.6vw,32px);line-height:1.3;margin:0 0 18px;letter-spacing:-.01em}
+.hero h2 em{font-style:normal;color:var(--orange)}
+.hero p.lead{color:var(--muted);font-family:var(--mono);font-size:15px;max-width:520px;margin:0 0 10px}
+.hero .comment{font-size:14px;line-height:1.7;margin:18px 0 30px}
+.cta{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+.install-pill{display:inline-flex;align-items:center;gap:12px;font-family:var(--mono);font-size:14px;padding:11px 12px 11px 16px;border:1px dashed var(--line-2);border-radius:10px;background:rgba(22,18,16,.6);color:var(--text)}
+.install-pill .dollar{color:var(--orange)}
+.copy{background:none;border:1px solid var(--line-2);color:var(--muted);border-radius:6px;padding:4px 8px;font-family:var(--mono);font-size:11px;cursor:pointer;transition:all .2s}
+.copy:hover{color:var(--text);border-color:var(--orange)}
+.copy.done{color:var(--ok);border-color:var(--ok)}
+
+/* stage */
+.stage{position:relative;aspect-ratio:1/0.92;width:100%;max-width:600px;justify-self:end}
+.stage-inner{position:absolute;inset:0}
+.slipper-wrap{position:absolute;left:-4%;top:14%;width:74%;transform-origin:85% 70%;filter:drop-shadow(0 30px 40px rgba(0,0,0,.7)) drop-shadow(0 0 30px rgba(255,107,26,.18));z-index:3}
+.slipper-wrap svg{width:100%;height:auto;display:block;overflow:visible}
+.tags{position:absolute;right:0;top:4%;display:flex;flex-direction:column;gap:12px;align-items:flex-end;z-index:2}
+.tag{font-family:var(--mono);font-weight:700;font-size:clamp(18px,2.5vw,30px);padding:4px 16px;color:#e9e1d8;background:
+  linear-gradient(135deg,rgba(255,255,255,.05),transparent 40%),#1a1614;border:1px solid #332a24;
+  box-shadow:0 8px 24px rgba(0,0,0,.5),inset 0 0 0 1px rgba(0,0,0,.4);position:relative;white-space:pre;min-width:4ch;text-align:center;
+  clip-path:polygon(0 6%,3% 0,97% 4%,100% 0,99% 90%,100% 100%,4% 96%,0 100%)}
+.tag::before{content:"";position:absolute;inset:0;background:repeating-linear-gradient(0deg,rgba(255,255,255,.035) 0 2px,transparent 2px 4px);pointer-events:none}
+.tag:nth-child(odd){transform:rotate(-3deg) translateX(-10px)}
+.tag:nth-child(even){transform:rotate(2deg)}
+.tag:nth-child(3){transform:rotate(-1deg) translateX(-24px)}
+.tag.hit{color:var(--orange);border-color:rgba(255,107,26,.5);text-shadow:0 0 12px rgba(255,107,26,.6)}
+.tag.glitch{animation:glitch .35s steps(2) 2}
+@keyframes glitch{0%{clip-path:inset(0 0 60% 0);translate:-4px 0}50%{clip-path:inset(40% 0 0 0);translate:5px 0}100%{clip-path:inset(0);translate:0}}
+.blocked{position:absolute;right:2%;bottom:0;z-index:4;font-family:var(--mono);font-weight:700;color:var(--orange);border:2px solid var(--orange);padding:10px 18px;line-height:1.25;letter-spacing:.08em;background:rgba(20,10,4,.75);box-shadow:0 0 0 rgba(255,107,26,0);opacity:.35;transition:opacity .3s,box-shadow .3s;font-size:18px}
+.blocked span{display:block;font-size:22px;letter-spacing:.2em;color:#fff}
+.blocked.on{opacity:1;box-shadow:0 0 40px rgba(255,107,26,.55),inset 0 0 20px rgba(255,107,26,.2)}
+.stage.shake{animation:shake .4s cubic-bezier(.36,.07,.19,.97)}
+@keyframes shake{10%,90%{transform:translate(-2px,1px)}20%,80%{transform:translate(4px,-2px)}30%,50%,70%{transform:translate(-6px,3px)}40%,60%{transform:translate(6px,-2px)}}
+.hero-side{position:absolute;right:24px;top:28px;z-index:3;font-family:var(--mono);font-size:12px;letter-spacing:.2em;color:var(--dim);text-align:right;line-height:1.7}
+
+/* feature strip */
+.strip{position:relative;z-index:2;border-top:1px solid var(--line);border-bottom:1px solid var(--line);background:rgba(17,14,12,.7)}
+.strip .wrap{display:grid;grid-template-columns:repeat(5,1fr);gap:0}
+.feat{display:flex;gap:14px;align-items:flex-start;padding:26px 18px;border-right:1px solid var(--line)}
+.feat:last-child{border-right:0}
+.feat svg{width:32px;height:32px;flex:none;color:var(--orange)}
+.feat b{display:block;font-family:var(--mono);font-size:15px;font-weight:700}
+.feat small{display:block;font-family:var(--mono);font-size:11px;letter-spacing:.12em;color:var(--muted);text-transform:uppercase;margin-top:2px}
+
+/* sections */
+section{padding:110px 0;position:relative}
+.sec-head{max-width:720px;margin-bottom:48px}
+.sec-head h2{font-size:clamp(34px,4.6vw,54px);letter-spacing:-.035em;line-height:1.05;margin:16px 0 16px;font-weight:800}
+.sec-head p{color:var(--muted);font-size:17px;margin:0}
+.reveal{opacity:0;transform:translateY(24px);transition:opacity .8s cubic-bezier(.2,.7,.2,1),transform .8s cubic-bezier(.2,.7,.2,1)}
+.reveal.in{opacity:1;transform:none}
+
+/* ── demo ── */
+.demo-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.card{background:linear-gradient(180deg,var(--surface),var(--bg-2));border:1px solid var(--line);border-radius:var(--radius);position:relative;overflow:hidden}
+.card-head{display:flex;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid var(--line);font-family:var(--mono);font-size:12px;color:var(--muted)}
+.dots{display:flex;gap:6px}.dots i{width:10px;height:10px;border-radius:50%;background:var(--line-2)}
+.dots i:first-child{background:var(--orange)}
+.card-head .r{margin-left:auto}
+.card-body{padding:18px}
+textarea{width:100%;min-height:150px;resize:vertical;background:#0e0b0a;border:1px solid var(--line);border-radius:10px;color:var(--text);font-family:var(--mono);font-size:16px;line-height:1.6;padding:14px 16px;outline:none;transition:border-color .2s,box-shadow .2s}
+textarea:focus{border-color:var(--orange);box-shadow:0 0 0 4px var(--orange-dim)}
+.controls{display:flex;flex-wrap:wrap;gap:16px;margin:0 0 14px}
+.ctl label{display:block;font-family:var(--mono);font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--dim);margin-bottom:6px}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;padding:3px;background:#0e0b0a}
+.seg button{background:none;border:0;color:var(--muted);font-family:var(--mono);font-size:12px;padding:6px 10px;border-radius:6px;cursor:pointer;transition:all .2s}
+.seg button:hover{color:var(--text)}
+.seg button.on{background:var(--orange);color:#160b04;font-weight:700}
+.presets{margin-top:16px}
+.presets h4{font-family:var(--mono);font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--dim);margin:12px 0 8px;font-weight:500}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{font-family:var(--mono);font-size:13px;border:1px solid var(--line-2);background:var(--surface-2);color:var(--text);padding:5px 11px;border-radius:999px;cursor:pointer;transition:all .18s}
+.chip:hover{border-color:var(--orange);color:var(--orange);transform:translateY(-1px)}
+.chip.safe:hover{border-color:var(--ok);color:var(--ok)}
+.out{min-height:150px;background:#0e0b0a;border:1px solid var(--line);border-radius:10px;padding:14px 16px;font-family:var(--mono);font-size:16px;line-height:1.9;white-space:pre-wrap;word-break:break-word}
+.out .m{position:relative;color:var(--orange);background:var(--orange-dim);border-radius:4px;padding:1px 2px;box-shadow:inset 0 -2px 0 var(--orange);cursor:help;display:inline-block;line-height:1.35;animation:stamp .45s cubic-bezier(.2,1.6,.4,1) both}
+@keyframes stamp{0%{transform:scale(1.6) rotate(-4deg);opacity:0;filter:blur(3px)}100%{transform:none;opacity:1;filter:none}}
+.out .m:hover::after{content:attr(data-tip);position:absolute;left:0;bottom:calc(100% + 6px);white-space:nowrap;background:#000;border:1px solid var(--orange);color:var(--text);font-size:11px;padding:4px 8px;border-radius:6px;z-index:5}
+.out.empty{color:var(--dim)}
+.verdict{display:flex;align-items:center;gap:14px;margin-bottom:14px}
+.badge{font-family:var(--mono);font-weight:700;font-size:13px;letter-spacing:.14em;padding:6px 12px;border-radius:6px;border:1px solid;transition:all .3s}
+.badge.clean{color:var(--ok);border-color:rgba(143,214,148,.4);background:rgba(143,214,148,.08)}
+.badge.blocked-b{color:var(--orange);border-color:var(--orange);background:var(--orange-dim);box-shadow:0 0 24px rgba(255,107,26,.3)}
+.badge.wait{color:var(--muted);border-color:var(--line-2)}
+.mini-slipper{width:44px;height:30px;color:var(--orange);transform-origin:80% 80%;opacity:.25;transition:opacity .3s}
+.mini-slipper.slap{animation:slap .5s cubic-bezier(.3,1.5,.5,1);opacity:1}
+@keyframes slap{0%{transform:rotate(-40deg) translateY(-8px)}60%{transform:rotate(12deg)}100%{transform:none}}
+.stats{display:flex;gap:8px;margin-left:auto;font-family:var(--mono);font-size:12px;color:var(--muted);flex-wrap:wrap;justify-content:flex-end}
+.stats span{border:1px solid var(--line);padding:4px 8px;border-radius:6px}
+.stats b{color:var(--text)}
+.matches{margin-top:14px;font-family:var(--mono);font-size:12.5px}
+.matches table{width:100%;border-collapse:collapse}
+.matches th{text-align:left;color:var(--dim);font-weight:500;font-size:10px;letter-spacing:.16em;text-transform:uppercase;padding:6px 8px;border-bottom:1px solid var(--line)}
+.matches td{padding:7px 8px;border-bottom:1px dashed var(--line);vertical-align:top}
+.matches tr{animation:rowIn .35s ease both}
+@keyframes rowIn{from{opacity:0;transform:translateX(-8px)}to{opacity:1;transform:none}}
+.sev{display:inline-block;padding:1px 7px;border-radius:4px;font-size:11px}
+.sev.high{background:rgba(255,90,60,.16);color:#ff8266}.sev.medium{background:rgba(255,179,71,.14);color:var(--ember)}.sev.low{background:rgba(150,138,128,.15);color:var(--muted)}
+.norm{margin-top:14px;font-family:var(--mono);font-size:12.5px;color:var(--muted);border-top:1px solid var(--line);padding-top:12px;word-break:break-all}
+.norm b{color:var(--dim);font-weight:500;letter-spacing:.14em;font-size:10px;text-transform:uppercase;margin-right:8px}
+.norm code{color:var(--text)}
+.status-line{font-family:var(--mono);font-size:11px;color:var(--dim);margin-top:10px}
+.status-line .pulse{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--orange);margin-right:6px;animation:pulse 1s infinite}
+@keyframes pulse{50%{opacity:.2}}
+
+/* chat */
+.chat-grid .card pre{height:100%}
+.chat-grid{display:grid;grid-template-columns:1.1fr .9fr;gap:20px;margin-top:20px}
+.feed{height:380px;overflow:hidden;padding:16px;display:flex;flex-direction:column;justify-content:flex-end;gap:10px;mask-image:linear-gradient(transparent,#000 25%)}
+.msg{display:flex;gap:10px;align-items:flex-start;animation:msgIn .45s cubic-bezier(.2,.9,.3,1.2) both}
+@keyframes msgIn{from{opacity:0;transform:translateY(16px) scale(.97)}to{opacity:1;transform:none}}
+.avatar{width:30px;height:30px;border-radius:8px;flex:none;display:grid;place-items:center;font-family:var(--mono);font-size:12px;font-weight:700;color:#160b04}
+.bubble{background:var(--surface-2);border:1px solid var(--line);border-radius:4px 12px 12px 12px;padding:7px 12px;font-family:var(--mono);font-size:14px;max-width:88%}
+.bubble .who{display:block;font-size:11px;color:var(--dim);margin-bottom:1px}
+.bubble.flag{border-color:rgba(255,107,26,.55);box-shadow:0 0 0 3px var(--orange-dim)}
+.bubble .txt{transition:color .3s}
+.bubble .flag-note{display:block;font-size:10px;letter-spacing:.14em;color:var(--orange);margin-top:3px}
+.bubble .m{color:var(--orange)}
+pre.code{margin:0;padding:18px 20px;overflow-x:auto;font-family:var(--mono);font-size:13.5px;line-height:1.7;color:#d9d0c7;background:#0e0b0a}
+.tk-k{color:var(--orange)}.tk-s{color:#e6c07b}.tk-c{color:var(--dim);font-style:italic}.tk-n{color:#8fd6c9}.tk-f{color:#f1ebe4;font-weight:500}
+
+/* pipeline */
+.pipe{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;position:relative}
+.stage-card{border:1px solid var(--line);background:var(--surface);border-radius:12px;padding:16px;position:relative;transition:border-color .3s,transform .3s,box-shadow .3s}
+.stage-card .n{font-family:var(--mono);font-size:11px;color:var(--dim);letter-spacing:.14em}
+.stage-card h3{font-size:15px;margin:6px 0 10px;letter-spacing:-.01em}
+.stage-card .ex{font-family:var(--mono);font-size:13px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.stage-card .ex s{text-decoration:none;color:var(--muted)}
+.stage-card .ex i{font-style:normal;color:var(--orange)}
+.stage-card .ex .zw{font-size:8px;color:var(--orange);border:1px dashed var(--orange);border-radius:3px;padding:0 2px;margin:0 1px;vertical-align:middle}
+.stage-card .ex .cy{text-decoration:none;color:var(--orange);border-bottom:1px dashed var(--orange)}
+.stage-card .ex em{font-style:normal;color:var(--text);background:var(--surface-2);padding:0 6px;border-radius:4px}
+.stage-card.active{border-color:var(--orange);transform:translateY(-4px);box-shadow:0 14px 40px -16px rgba(255,107,26,.6)}
+.pipe-tail{display:flex;align-items:center;gap:12px;margin-top:18px;font-family:var(--mono);font-size:13px;color:var(--muted);flex-wrap:wrap}
+.pipe-tail span{border:1px solid var(--line-2);padding:6px 12px;border-radius:8px}
+.pipe-tail span.fin{border-color:var(--orange);color:var(--orange)}
+.norm-live{margin-top:28px;display:grid;grid-template-columns:1fr auto 1fr;gap:14px;align-items:center}
+.norm-live input{width:100%;background:#0e0b0a;border:1px solid var(--line);border-radius:10px;color:var(--text);font-family:var(--mono);font-size:16px;padding:14px 16px;outline:none}
+.norm-live input:focus{border-color:var(--orange)}
+.norm-live .arrow{font-family:var(--mono);color:var(--orange);font-size:13px;text-align:center}
+.norm-live output{display:block;min-height:52px;background:var(--surface-2);border:1px dashed var(--line-2);border-radius:10px;padding:14px 16px;font-family:var(--mono);font-size:16px;color:var(--orange);word-break:break-all}
+
+/* bench */
+.bench-grid{display:grid;grid-template-columns:1.2fr .8fr;gap:20px}
+.bars{padding:22px}
+.bar-row{display:grid;grid-template-columns:120px 1fr 64px;gap:14px;align-items:center;margin:14px 0;font-family:var(--mono);font-size:13px}
+.bar-track{height:28px;background:#0e0b0a;border:1px solid var(--line);border-radius:6px;overflow:hidden}
+.bar{height:100%;width:0;background:var(--line-2);transition:width 1.4s cubic-bezier(.2,.8,.2,1)}
+.bar.me{background:linear-gradient(90deg,#c94a0c,var(--orange),var(--ember));box-shadow:0 0 24px rgba(255,107,26,.5)}
+.bar-row .v{text-align:right;color:var(--muted)}
+.bar-row.me .v,.bar-row.me .name{color:var(--text);font-weight:700}
+.bench-note{font-family:var(--mono);font-size:11.5px;color:var(--dim);margin-top:16px;line-height:1.6}
+.nums{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.num{border:1px solid var(--line);border-radius:12px;padding:18px;background:var(--surface)}
+.num b{display:block;font-size:34px;font-weight:800;letter-spacing:-.03em;line-height:1.1}
+.num b i{font-style:normal;color:var(--orange)}
+.num small{font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:.1em;text-transform:uppercase}
+
+/* install */
+.tabs{display:flex;gap:4px;padding:8px 8px 0;border-bottom:1px solid var(--line);overflow-x:auto}
+.tabs button{background:none;border:0;border-bottom:2px solid transparent;color:var(--muted);font-family:var(--mono);font-size:13px;padding:10px 14px;cursor:pointer;white-space:nowrap}
+.tabs button.on{color:var(--text);border-bottom-color:var(--orange)}
+.install-grid{display:grid;grid-template-columns:.8fr 1.2fr;gap:20px;align-items:start}
+.pm{display:flex;flex-direction:column;gap:10px}
+.pm .install-pill{justify-content:space-between;width:100%}
+.runtimes{display:flex;flex-wrap:wrap;gap:8px;margin-top:22px}
+.runtimes span{font-family:var(--mono);font-size:12px;border:1px solid var(--line);color:var(--muted);padding:5px 10px;border-radius:6px}
+.checklist{list-style:none;padding:0;margin:26px 0 0;font-family:var(--mono);font-size:13.5px;color:var(--muted)}
+.checklist li{padding:7px 0;border-bottom:1px dashed var(--line)}
+.checklist li::before{content:"→ ";color:var(--orange)}
+
+/* ports + footer */
+.ports{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.port small{overflow-wrap:anywhere}
+.port{border:1px solid var(--line);border-radius:12px;padding:20px;background:var(--surface);text-decoration:none;transition:border-color .2s,transform .2s;display:block}
+a.port:hover{border-color:var(--orange);transform:translateY(-2px)}
+.port b{font-size:20px;display:block}
+.port small{font-family:var(--mono);font-size:12px;color:var(--muted)}
+.port .st{float:right;font-family:var(--mono);font-size:11px;color:var(--ok)}
+.port .st.planned{color:var(--dim)}
+.final{text-align:center;padding:120px 0 90px}
+.final h2{font-size:clamp(40px,6vw,76px);font-weight:800;letter-spacing:-.045em;line-height:1;margin:0 0 20px}
+.final p{color:var(--muted);font-family:var(--mono);margin:0 0 34px}
+.final .cta{justify-content:center}
+footer{border-top:1px solid var(--line);padding:28px 0;font-family:var(--mono);font-size:12px;color:var(--dim)}
+footer .wrap{display:flex;gap:20px;flex-wrap:wrap;align-items:center}
+footer a{color:var(--muted);text-decoration:none}
+footer a:hover{color:var(--orange)}
+footer .r{margin-left:auto;display:flex;gap:18px}
+
+/* responsive */
+@media (max-width:980px){
+  .ports{grid-template-columns:1fr}
+  .hero .wrap{grid-template-columns:1fr}
+  .stage{justify-self:center;max-width:520px}
+  .hero-side{display:none}
+  .strip .wrap{grid-template-columns:repeat(2,1fr)}
+  .feat{border-bottom:1px solid var(--line)}
+  .feat:nth-child(2n){border-right:0}
+  .demo-grid,.chat-grid,.bench-grid,.install-grid{grid-template-columns:1fr}
+  .pipe{grid-template-columns:repeat(2,1fr)}
+  nav ul{display:none}
+  nav .btn{margin-left:auto}
+}
+@media (max-width:560px){
+  .wrap{padding:0 16px}
+  section{padding:80px 0}
+  .hero{padding-top:24px}
+  .strip .wrap{grid-template-columns:1fr}
+  .feat{border-right:0}
+  .ports{grid-template-columns:1fr}
+  .norm-live{grid-template-columns:1fr}
+  .norm-live .arrow{transform:rotate(90deg)}
+  .bar-row{grid-template-columns:90px 1fr 54px;gap:8px}
+  .stats{margin-left:0;justify-content:flex-start}
+  .verdict{flex-wrap:wrap}
+  footer .r{margin-left:0}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important}
+  html{scroll-behavior:auto}
+}
+</style>
+</head>
+<body>
+
+<nav id="nav">
+  <div class="wrap">
+    <a class="logo" href="#top"><img src="assets/icon.png" alt=""><span>terlik<b>.js</b></span></a>
+    <ul>
+      <li><a href="#demo">demo</a></li>
+      <li><a href="#pipeline">how it works</a></li>
+      <li><a href="#bench">benchmarks</a></li>
+      <li><a href="#install">install</a></li>
+    </ul>
+    <a class="btn small" href="https://github.com/badursun/terlik.js" target="_blank" rel="noopener">
+      <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+      GitHub
+    </a>
+  </div>
+</nav>
+
+<!-- ───────── HERO ───────── -->
+<header class="hero" id="top">
+  <canvas id="embers" aria-hidden="true"></canvas>
+  <div class="hero-side">CLEANER<br>SAFER<br>COMMUNITIES<br><span class="accent">—</span></div>
+  <div class="wrap">
+    <div>
+      <span class="eyebrow">Open source · v2.5.0</span>
+      <h1>terlik<b>.js</b></h1>
+      <h2>Profanity filtering<br>that <em>catches the tricks</em>.</h2>
+      <p class="lead">A fast, extensible and multilingual profanity detection engine for developers.</p>
+      <div class="comment">// not a naive blacklist<br>// a normalization + pattern engine</div>
+      <div class="cta">
+        <a class="btn primary" href="#demo">Try it live ↓</a>
+        <span class="install-pill"><span><span class="dollar">$</span> npm i terlik.js</span><button class="copy" data-copy="npm install terlik.js">copy</button></span>
+      </div>
+    </div>
+
+    <div class="stage" id="stage" aria-hidden="true">
+      <div class="stage-inner">
+        <div class="tags" id="tags"></div>
+        <div class="slipper-wrap" id="slipper">
+          <svg viewBox="0 0 420 260">
+            <defs>
+              <pattern id="tread" width="14" height="14" patternUnits="userSpaceOnUse" patternTransform="rotate(35)">
+                <rect width="14" height="14" fill="#1b1714"/>
+                <rect width="8" height="5" x="3" y="4" rx="1.5" fill="#110e0c"/>
+              </pattern>
+              <linearGradient id="rim" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0" stop-color="#ffa35c"/><stop offset=".5" stop-color="#ff6b1a"/><stop offset="1" stop-color="#9c3a06"/>
+              </linearGradient>
+              <linearGradient id="strap" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0" stop-color="#ff9a4d"/><stop offset="1" stop-color="#d4520c"/>
+              </linearGradient>
+              <radialGradient id="shine" cx=".35" cy=".3" r=".8">
+                <stop offset="0" stop-color="#fff" stop-opacity=".09"/><stop offset="1" stop-color="#fff" stop-opacity="0"/>
+              </radialGradient>
+            </defs>
+            <!-- sole: base layer (orange mid-sole visible as the thick rim) -->
+            <path d="M30,150 C26,96 104,70 196,78 C268,84 340,66 384,104 C412,128 404,176 368,192 C326,212 262,196 196,206 C112,218 34,206 30,150 Z" fill="#0d0a09" transform="translate(0,16)"/>
+            <path d="M30,150 C26,96 104,70 196,78 C268,84 340,66 384,104 C412,128 404,176 368,192 C326,212 262,196 196,206 C112,218 34,206 30,150 Z" fill="url(#rim)" transform="translate(0,8)"/>
+            <path d="M30,150 C26,96 104,70 196,78 C268,84 340,66 384,104 C412,128 404,176 368,192 C326,212 262,196 196,206 C112,218 34,206 30,150 Z" fill="url(#tread)" stroke="#2a221d" stroke-width="3"/>
+            <path d="M30,150 C26,96 104,70 196,78 C268,84 340,66 384,104 C412,128 404,176 368,192 C326,212 262,196 196,206 C112,218 34,206 30,150 Z" fill="url(#shine)"/>
+            <!-- strap -->
+            <path d="M330,136 C300,96 250,70 190,84" fill="none" stroke="#5a2204" stroke-width="30" stroke-linecap="round" transform="translate(0,6)"/>
+            <path d="M330,136 C300,176 250,200 196,196" fill="none" stroke="#5a2204" stroke-width="30" stroke-linecap="round" transform="translate(0,6)"/>
+            <path d="M330,136 C300,176 250,200 196,196" fill="none" stroke="url(#strap)" stroke-width="28" stroke-linecap="round"/>
+            <path d="M330,136 C300,96 250,70 190,84" fill="none" stroke="url(#strap)" stroke-width="28" stroke-linecap="round"/>
+            <path d="M322,128 C296,96 252,78 198,88" fill="none" stroke="#ffd0a6" stroke-opacity=".45" stroke-width="3" stroke-linecap="round"/>
+            <!-- toe post -->
+            <circle cx="332" cy="137" r="11" fill="#2a1a10" stroke="#ff8a3d" stroke-width="3"/>
+            <!-- badge -->
+            <g transform="translate(250,86) rotate(-14)">
+              <rect x="-22" y="-22" width="44" height="44" rx="8" fill="#1b1512" stroke="#ff8a3d" stroke-width="2.5"/>
+              <text x="0" y="10" text-anchor="middle" font-family="Sora,sans-serif" font-weight="800" font-size="30" fill="#ff6b1a">t</text>
+            </g>
+          </svg>
+        </div>
+        <div class="blocked" id="blockedBadge">BLOCKED<span>******</span></div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="strip">
+  <div class="wrap">
+    <div class="feat reveal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.7 3.8 5.7 3.8 9s-1.3 6.3-3.8 9c-2.5-2.7-3.8-5.7-3.8-9S9.5 5.7 12 3z"/></svg><div><b>Turkish-first</b><small>Built for real language</small></div></div>
+    <div class="feat reveal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 5h16v11H9l-5 4z"/><circle cx="9" cy="10.5" r=".6" fill="currentColor"/><circle cx="12" cy="10.5" r=".6" fill="currentColor"/><circle cx="15" cy="10.5" r=".6" fill="currentColor"/></svg><div><b>4 languages</b><small>TR · EN · ES · DE</small></div></div>
+    <div class="feat reveal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2.8l8 4.6v9.2l-8 4.6-8-4.6V7.4z"/><path d="M4 7.4l8 4.6 8-4.6M12 12v9.2"/></svg><div><b>Zero deps</b><small>~14 KB gzip</small></div></div>
+    <div class="feat reveal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M13 2L4.5 13.5H11L10 22l8.5-11.5H12z"/></svg><div><b>&lt;1ms checks</b><small>Fast &amp; efficient</small></div></div>
+    <div class="feat reveal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 7l-5 5 5 5M16 7l5 5-5 5M14 4l-4 16"/></svg><div><b>Runs anywhere</b><small>Node · Browser · Bun · Deno · Edge</small></div></div>
+  </div>
+</div>
+
+<!-- ───────── DEMO ───────── -->
+<section id="demo">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <span class="eyebrow">Live playground</span>
+      <h2>Try to sneak one <span class="accent">past it.</span></h2>
+      <p>This is the real library, running in your browser inside a Web Worker. Type anything, pick a preset, switch languages and modes. Nothing leaves your machine.</p>
+    </div>
+
+    <div class="demo-grid">
+      <div class="card reveal">
+        <div class="card-head"><span class="dots"><i></i><i></i><i></i></span> input.txt <span class="r" id="charCount">0 chars</span></div>
+        <div class="card-body">
+          <div class="controls">
+            <div class="ctl"><label>Language</label><div class="seg" data-key="lang"><button data-v="tr" class="on">TR</button><button data-v="en">EN</button><button data-v="es">ES</button><button data-v="de">DE</button></div></div>
+            <div class="ctl"><label>Mode</label><div class="seg" data-key="mode"><button data-v="strict">strict</button><button data-v="balanced" class="on">balanced</button><button data-v="loose">loose</button></div></div>
+            <div class="ctl"><label>Mask</label><div class="seg" data-key="maskStyle"><button data-v="stars" class="on">stars</button><button data-v="partial">partial</button><button data-v="replace">replace</button></div></div>
+          </div>
+          <textarea id="input" spellcheck="false" aria-label="Text to check"></textarea>
+          <div class="presets">
+            <h4>Evasion tricks — click to load</h4>
+            <div class="chips" id="dirtyChips"></div>
+            <h4>Whitelist traps — should stay clean</h4>
+            <div class="chips" id="safeChips"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card reveal">
+        <div class="card-head"><span class="dots"><i></i><i></i><i></i></span> terlik.clean(text) <span class="r mono" id="apiHint">getMatches · clean</span></div>
+        <div class="card-body">
+          <div class="verdict">
+            <svg class="mini-slipper" id="miniSlipper" viewBox="0 0 44 30" fill="none"><path d="M3 17c0-6 8-9 17-8.4 7 .5 13-1.4 17.5 2.2 3 2.4 2.4 7-1 8.6-4 1.8-10 .4-16.6 1.2C11 21.6 3 22 3 17z" fill="currentColor" opacity=".25" stroke="currentColor" stroke-width="1.6"/><path d="M34 14c-3-4-8-5.5-13.5-4.5M34 14c-3 3.8-8 5.6-13 5.2" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg>
+            <span class="badge wait" id="verdict">WARMING UP</span>
+            <div class="stats"><span><b id="stMatches">0</b> matches</span><span><b id="stTime">–</b></span></div>
+          </div>
+          <div class="out empty" id="output">…</div>
+          <div class="matches" id="matches"></div>
+          <div class="norm"><b>normalized</b><code id="normalized">–</code></div>
+          <div class="status-line" id="statusLine"><span class="pulse"></span>compiling Turkish patterns in a worker (one-time, first call only)…</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- chat -->
+    <div class="chat-grid">
+      <div class="card reveal">
+        <div class="card-head"><span class="dots"><i></i><i></i><i></i></span> #general — live moderation <span class="r"><span id="feedCount">0</span> filtered</span></div>
+        <div class="feed" id="feed"></div>
+      </div>
+      <div class="card reveal">
+        <div class="card-head"><span class="dots"><i></i><i></i><i></i></span> server.ts</div>
+<pre class="code" data-hl><code>import { Terlik } from "terlik.js";
+
+// one instance, warmed up at boot
+const terlik = new Terlik();
+terlik.containsProfanity("warmup");
+
+io.on("connection", (socket) =&gt; {
+  socket.on("message", (text) =&gt; {
+    // &lt;1ms per message after warmup
+    io.emit("message", terlik.clean(text));
+  });
+});</code></pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ───────── PIPELINE ───────── -->
+<section id="pipeline" style="background:linear-gradient(180deg,transparent,rgba(255,107,26,.03),transparent)">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <span class="eyebrow">How it works</span>
+      <h2>Ten passes of <span class="accent">normalization</span>, then the pattern engine.</h2>
+      <p>Every trick people use gets undone before matching. The engine is language-agnostic — each language ships only data: a char map, a leet map, char classes and a dictionary.</p>
+    </div>
+    <div class="pipe" id="pipe">
+      <div class="stage-card reveal"><div class="n">01</div><h3>Strip invisible chars</h3><div class="ex"><s>s<sub class="zw">ZW</sub>i<sub class="zw">ZW</sub>k</s><i>→</i><em>sik</em></div></div>
+      <div class="stage-card reveal"><div class="n">02</div><h3>NFKD decompose</h3><div class="ex"><s>ｓｉｋ</s><i>→</i><em>sik</em></div></div>
+      <div class="stage-card reveal"><div class="n">03</div><h3>Strip diacritics</h3><div class="ex"><s>sîk</s><i>→</i><em>sik</em></div></div>
+      <div class="stage-card reveal"><div class="n">04</div><h3>Locale lowercase</h3><div class="ex"><s>SİK</s><i>→</i><em>sik</em></div></div>
+      <div class="stage-card reveal"><div class="n">05</div><h3>Cyrillic → Latin</h3><div class="ex"><s><u class="cy" title="Cyrillic а (U+0430)">а</u>mk</s><i>→</i><em>amk</em></div></div>
+      <div class="stage-card reveal"><div class="n">06</div><h3>Char folding</h3><div class="ex"><s>şık</s><i>→</i><em>sik</em></div></div>
+      <div class="stage-card reveal"><div class="n">07</div><h3>Number words</h3><div class="ex"><s>s2k</s><i>→</i><em>sikik</em></div></div>
+      <div class="stage-card reveal"><div class="n">08</div><h3>Leet decode</h3><div class="ex"><s>$1k</s><i>→</i><em>sik</em></div></div>
+      <div class="stage-card reveal"><div class="n">09</div><h3>Separator removal</h3><div class="ex"><s>s.i.k</s><i>→</i><em>sik</em></div></div>
+      <div class="stage-card reveal"><div class="n">10</div><h3>Repeat collapse</h3><div class="ex"><s>siiiiik</s><i>→</i><em>sik</em></div></div>
+    </div>
+    <div class="pipe-tail reveal"><span>pattern match + suffix engine</span><i class="accent">→</i><span>whitelist filter</span><i class="accent">→</i><span class="fin">result</span><span style="border:0;padding:0;color:var(--dim)">// 83 Turkish suffixes, up to 2 chained: sik + tir + ler</span></div>
+
+    <div class="norm-live reveal">
+      <input id="normIn" value="$.İ.İ.İ.K.T.1.R" aria-label="Text to normalize" spellcheck="false">
+      <div class="arrow">normalize() →</div>
+      <output id="normOut">…</output>
+    </div>
+  </div>
+</section>
+
+<!-- ───────── BENCH ───────── -->
+<section id="bench">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <span class="eyebrow">Benchmarks</span>
+      <h2>High precision. <span class="accent">No false alarms.</span></h2>
+      <p>In chat systems a false positive costs more than a miss — blocking “class” or “Amsterdam” erodes trust. terlik.js keeps a deliberately narrow dictionary and lets the engine do the expansion.</p>
+    </div>
+    <div class="bench-grid">
+      <div class="card reveal">
+        <div class="card-head"><span class="dots"><i></i><i></i><i></i></span> F1 score — 1,281-sample adversarial English corpus <span class="r">default settings</span></div>
+        <div class="bars" id="bars">
+          <div class="bar-row me"><span class="name">terlik.js</span><div class="bar-track"><div class="bar me" data-w="81.0"></div></div><span class="v">81.0%</span></div>
+          <div class="bar-row"><span class="name">obscenity</span><div class="bar-track"><div class="bar" data-w="42.9"></div></div><span class="v">42.9%</span></div>
+          <div class="bar-row"><span class="name">bad-words</span><div class="bar-track"><div class="bar" data-w="32.2"></div></div><span class="v">32.2%</span></div>
+          <div class="bar-row"><span class="name">allprofanity</span><div class="bar-track"><div class="bar" data-w="28.7"></div></div><span class="v">28.7%</span></div>
+          <div class="bench-note">terlik.js: 100.0% precision · 0.0% false-positive rate. On the curated 290-sample subset it scores 100% F1. Corpus includes zalgo, zero-width, homoglyph and reversed-text attacks. Reproduce with <span class="accent">pnpm bench:compare</span>.</div>
+        </div>
+      </div>
+      <div class="nums">
+        <div class="num reveal"><b><span data-count="193">0</span><i>K</i></b><small>clean msgs / sec</small></div>
+        <div class="num reveal"><b><span data-count="390">0</span><i>K</i></b><small>strict mode msgs / sec</small></div>
+        <div class="num reveal"><b><span data-count="100">0</span><i>%</i></b><small>F1 · TR balanced</small></div>
+        <div class="num reveal"><b><span data-count="1341">0</span></b><small>tests</small></div>
+        <div class="num reveal"><b><span data-count="10000">0</span><i>+</i></b><small>TR forms from 147 roots</small></div>
+        <div class="num reveal"><b>~<span data-count="1.5" data-dec="1">0</span><i>ms</i></b><small>construction (lazy compile)</small></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ───────── INSTALL ───────── -->
+<section id="install">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <span class="eyebrow">Get started</span>
+      <h2>Three lines to a <span class="accent">cleaner</span> chat.</h2>
+      <p>ESM + CJS, full TypeScript types, per-language sub-path imports when you want the smallest possible bundle.</p>
+    </div>
+    <div class="install-grid">
+      <div class="reveal">
+        <div class="pm">
+          <span class="install-pill"><span><span class="dollar">$</span> npm install terlik.js</span><button class="copy" data-copy="npm install terlik.js">copy</button></span>
+          <span class="install-pill"><span><span class="dollar">$</span> pnpm add terlik.js</span><button class="copy" data-copy="pnpm add terlik.js">copy</button></span>
+          <span class="install-pill"><span><span class="dollar">$</span> yarn add terlik.js</span><button class="copy" data-copy="yarn add terlik.js">copy</button></span>
+        </div>
+        <ul class="checklist">
+          <li>Three modes: strict · balanced · loose (fuzzy)</li>
+          <li>Mask styles: stars · partial · replace</li>
+          <li>Filter by severity and category</li>
+          <li>addWords / removeWords / extendDictionary</li>
+          <li>ReDoS-safe patterns with a timeout safety net</li>
+        </ul>
+        <div class="runtimes"><span>Node 20+</span><span>Browsers</span><span>Bun</span><span>Deno</span><span>Cloudflare Workers</span><span>Edge</span></div>
+      </div>
+      <div class="card reveal">
+        <div class="tabs" id="codeTabs"><button class="on" data-t="0">quick-start.ts</button><button data-t="1">per-language.ts</button><button data-t="2">matches.ts</button><button data-t="3">options.ts</button></div>
+<pre class="code" data-hl data-tab="0"><code>import { Terlik } from "terlik.js";
+
+const terlik = new Terlik();              // Turkish by default
+
+terlik.containsProfanity("siktir git");   // true
+terlik.clean("siktir git burdan");        // "****** git burdan"
+terlik.containsProfanity("Amsterdam");    // false — whitelisted
+
+const en = new Terlik({ language: "en" });
+en.clean("what the phuck");               // "what the *****"</code></pre>
+<pre class="code" data-hl data-tab="1" hidden><code>// Only Turkish — no EN/ES/DE dictionaries bundled (~10 KB gzip)
+import { Terlik } from "terlik.js/tr";
+
+// Or the factory from any sub-path
+import { createTerlik } from "terlik.js/en";
+const en = createTerlik({ mode: "strict" });
+
+// Warm several languages at once
+const cache = Terlik.warmup(["tr", "en", "es", "de"]);
+cache.get("de").containsProfanity("scheiße"); // true</code></pre>
+<pre class="code" data-hl data-tab="2" hidden><code>terlik.getMatches("$1kt1r git");
+// [{
+//   word: "$1kt1r",   root: "sik",
+//   index: 0,         severity: "high",
+//   category: "sexual", method: "pattern"
+// }]
+
+terlik.clean("siktir git", { maskStyle: "partial" }); // "s****r git"
+terlik.clean("siktir git", { maskStyle: "replace" }); // "[***] git"</code></pre>
+<pre class="code" data-hl data-tab="3" hidden><code>const terlik = new Terlik({
+  language: "tr",              // "tr" | "en" | "es" | "de"
+  mode: "balanced",            // "strict" | "balanced" | "loose"
+  maskStyle: "stars",          // "stars" | "partial" | "replace"
+  customList: ["customword"],  // extra words to detect
+  whitelist: ["safeword"],     // extra words to allow
+  minSeverity: "medium",       // drop low-severity matches
+  excludeCategories: ["slur"], // skip whole categories
+  backgroundWarmup: true,      // compile patterns off the hot path
+});</code></pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ───────── PORTS ───────── -->
+<section id="ports" style="padding-top:40px">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <span class="eyebrow">Community ports</span>
+      <h2>Same engine, <span class="accent">other stacks.</span></h2>
+    </div>
+    <div class="ports">
+      <a class="port reveal" href="https://github.com/KilimcininKorOglu/terlik.go" target="_blank" rel="noopener"><span class="st">● active</span><b>Go</b><small>KilimcininKorOglu/terlik.go</small></a>
+      <a class="port reveal" href="https://github.com/KilimcininKorOglu/terlik.php" target="_blank" rel="noopener"><span class="st">● active</span><b>PHP</b><small>KilimcininKorOglu/terlik.php</small></a>
+      <div class="port reveal"><span class="st planned">○ planned</span><b>Python</b><small>coming soon — want to build it?</small></div>
+    </div>
+  </div>
+</section>
+
+<section class="final">
+  <div class="wrap reveal">
+    <div class="comment" style="margin-bottom:18px">// cleaner conversations for a better internet</div>
+    <h2>Give your chat<br>a <span class="accent">terlik.</span></h2>
+    <p>MIT licensed · zero dependencies · contributions & new language packs welcome</p>
+    <div class="cta">
+      <a class="btn primary" href="https://github.com/badursun/terlik.js" target="_blank" rel="noopener">★ Star on GitHub</a>
+      <a class="btn" href="https://www.npmjs.com/package/terlik.js" target="_blank" rel="noopener">View on npm</a>
+      <a class="btn" href="https://github.com/badursun/terlik.js/blob/main/docs/api.md" target="_blank" rel="noopener">API reference</a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <span>terlik<span class="accent">.js</span> · MIT · by Anthony Burak DURSUN</span>
+    <div class="r">
+      <a href="https://github.com/badursun/terlik.js/blob/main/CONTRIBUTING.md" target="_blank" rel="noopener">contribute</a>
+      <a href="https://github.com/badursun/terlik.js/blob/main/CHANGELOG.md" target="_blank" rel="noopener">changelog</a>
+      <a href="https://github.com/badursun/terlik.js/issues" target="_blank" rel="noopener">issues</a>
+    </div>
+  </div>
+</footer>
+
+<script type="module">
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+const esc = (s) => s.replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+
+/* ── worker bridge ───────────────────────────── */
+const worker = new Worker(new URL("./assets/worker.mjs", import.meta.url), { type: "module" });
+let seq = 0;
+const pending = new Map();
+worker.onmessage = ({ data }) => { const cb = pending.get(data.id); if (cb) { pending.delete(data.id); cb(data); } };
+const call = (msg) => new Promise((res) => { const id = ++seq; pending.set(id, res); worker.postMessage({ ...msg, id }); });
+const warmed = new Set();
+const warm = (lang) => warmed.has(lang) ? Promise.resolve() : call({ type: "warmup", lang }).then(() => warmed.add(lang));
+
+/* ── nav / copy / reveal ─────────────────────── */
+addEventListener("scroll", () => $("#nav").classList.toggle("scrolled", scrollY > 10), { passive: true });
+$$(".copy").forEach((b) => b.addEventListener("click", async () => {
+  try { await navigator.clipboard.writeText(b.dataset.copy); b.textContent = "copied"; b.classList.add("done"); }
+  catch { b.textContent = "⌘C"; }
+  setTimeout(() => { b.textContent = "copy"; b.classList.remove("done"); }, 1400);
+}));
+const io = new IntersectionObserver((es) => es.forEach((e) => {
+  if (!e.isIntersecting) return;
+  const el = e.target;
+  const sibs = [...el.parentElement.children].filter((c) => c.classList.contains("reveal"));
+  el.style.transitionDelay = `${Math.min(sibs.indexOf(el), 8) * 70}ms`;
+  el.classList.add("in");
+  io.unobserve(el);
+}), { threshold: 0.12 });
+$$(".reveal").forEach((el) => io.observe(el));
+
+/* ── tiny syntax highlighter ─────────────────── */
+const KW = /\b(import|from|const|let|new|return|true|false|await|async|export)\b/;
+$$("pre[data-hl] code").forEach((code) => {
+  const src = code.textContent;
+  const re = /(\/\/[^\n]*)|("(?:[^"\\]|\\.)*")|\b(\d+(?:\.\d+)?)\b|\b(import|from|const|let|new|return|true|false|await|async|export)\b|\b([A-Za-z_]\w*)(?=\()/g;
+  let out = "", last = 0, m;
+  while ((m = re.exec(src))) {
+    out += esc(src.slice(last, m.index));
+    const [t] = m;
+    const cls = m[1] ? "c" : m[2] ? "s" : m[3] ? "n" : m[4] ? "k" : "f";
+    out += `<span class="tk-${cls}">${esc(t)}</span>`;
+    last = m.index + t.length;
+  }
+  code.innerHTML = out + esc(src.slice(last));
+});
+$("#codeTabs").addEventListener("click", (e) => {
+  const b = e.target.closest("button"); if (!b) return;
+  $$("#codeTabs button").forEach((x) => x.classList.toggle("on", x === b));
+  $$("pre[data-tab]").forEach((p) => (p.hidden = p.dataset.tab !== b.dataset.t));
+});
+
+/* ── embers + sparks canvas ──────────────────── */
+const cv = $("#embers"), ctx = cv.getContext("2d");
+let W = 0, H = 0, dpr = 1;
+const embers = [], sparks = [];
+function resize() {
+  dpr = Math.min(devicePixelRatio || 1, 2);
+  W = cv.clientWidth; H = cv.clientHeight;
+  cv.width = W * dpr; cv.height = H * dpr; ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+}
+resize(); addEventListener("resize", resize);
+for (let i = 0; i < 70; i++) embers.push(newEmber(true));
+function newEmber(anyY) {
+  return { x: Math.random() * W, y: anyY ? Math.random() * H : H + 10, r: Math.random() * 1.8 + .4,
+    vy: -(Math.random() * .5 + .15), vx: (Math.random() - .5) * .25, a: Math.random() * .6 + .2, t: Math.random() * 6 };
+}
+function burst(x, y) {
+  for (let i = 0; i < 90; i++) {
+    const ang = -Math.PI * (0.1 + Math.random() * 0.9) + (Math.random() < .3 ? Math.PI * .1 : 0);
+    const sp = Math.random() * 9 + 2;
+    const debris = Math.random() < .28;
+    sparks.push({ x, y, vx: Math.cos(ang) * sp * (Math.random() < .5 ? 1 : -.6), vy: Math.sin(ang) * sp, life: 1,
+      decay: Math.random() * .02 + .012, s: debris ? Math.random() * 5 + 2 : Math.random() * 2 + .8, debris });
+  }
+}
+let heroVisible = true;
+new IntersectionObserver(([e]) => (heroVisible = e.isIntersecting)).observe($(".hero"));
+function frame() {
+  if (heroVisible) {
+    ctx.clearRect(0, 0, W, H);
+    ctx.globalCompositeOperation = "lighter";
+    for (const e of embers) {
+      e.t += .02; e.x += e.vx + Math.sin(e.t) * .2; e.y += e.vy;
+      if (e.y < -10) Object.assign(e, newEmber(false));
+      const g = ctx.createRadialGradient(e.x, e.y, 0, e.x, e.y, e.r * 4);
+      g.addColorStop(0, `rgba(255,150,60,${e.a})`); g.addColorStop(1, "rgba(255,90,20,0)");
+      ctx.fillStyle = g; ctx.beginPath(); ctx.arc(e.x, e.y, e.r * 4, 0, 7); ctx.fill();
+    }
+    for (let i = sparks.length - 1; i >= 0; i--) {
+      const p = sparks[i];
+      p.vy += .28; p.vx *= .985; p.x += p.vx; p.y += p.vy; p.life -= p.decay;
+      if (p.life <= 0) { sparks.splice(i, 1); continue; }
+      if (p.debris) {
+        ctx.globalCompositeOperation = "source-over";
+        ctx.fillStyle = `rgba(60,50,44,${p.life})`; ctx.fillRect(p.x, p.y, p.s, p.s);
+        ctx.globalCompositeOperation = "lighter";
+      } else {
+        ctx.strokeStyle = `rgba(255,${120 + p.life * 100 | 0},40,${p.life})`; ctx.lineWidth = p.s;
+        ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(p.x - p.vx * 1.8, p.y - p.vy * 1.8); ctx.stroke();
+      }
+    }
+    ctx.globalCompositeOperation = "source-over";
+  }
+  requestAnimationFrame(frame);
+}
+if (!reduced) requestAnimationFrame(frame);
+
+/* ── hero: the slam loop ─────────────────────── */
+const POOL = ["s2k", "$1kt1r", "p.u$ttt", "amk", "s.i.k", "o*o*c*", "g0t", "siiiktir", "i8ne", "or*spu", "8ok", "@pt@l", "phuck", "sh1t", "p.u.t.a", "sch3isse"];
+const tagsEl = $("#tags"), slipper = $("#slipper"), stage = $("#stage"), blockedB = $("#blockedBadge");
+const GLYPHS = "#$%&*@!?/\\<>01";
+let pool = [...POOL];
+function pickTags() {
+  pool.sort(() => Math.random() - .5);
+  return pool.slice(0, 5);
+}
+function renderTags(words) {
+  tagsEl.innerHTML = words.map((w) => `<div class="tag">${esc(w)}</div>`).join("");
+  $$(".tag", tagsEl).forEach((t) => { t.classList.add("glitch"); t.addEventListener("animationend", () => t.classList.remove("glitch"), { once: true }); });
+}
+function scramble(el, finalText, dur = 420) {
+  const start = performance.now(), len = finalText.length;
+  const step = (now) => {
+    const k = Math.min((now - start) / dur, 1);
+    const fixed = Math.floor(k * len);
+    el.textContent = finalText.slice(0, fixed) + Array.from({ length: len - fixed }, () => GLYPHS[Math.random() * GLYPHS.length | 0]).join("");
+    if (k < 1) requestAnimationFrame(step);
+  };
+  requestAnimationFrame(step);
+}
+function impact() {
+  const sr = stage.getBoundingClientRect(), hr = $(".hero").getBoundingClientRect();
+  const tr = tagsEl.getBoundingClientRect();
+  burst(tr.left - hr.left + tr.width * .3, tr.top - hr.top + tr.height * .55);
+  stage.classList.remove("shake"); void stage.offsetWidth; stage.classList.add("shake");
+  $$(".tag", tagsEl).forEach((t, i) => setTimeout(() => {
+    t.classList.add("hit");
+    scramble(t, "*".repeat(Math.max(t.textContent.length, 3)));
+  }, i * 55));
+  blockedB.classList.add("on");
+}
+function slam() {
+  if (!heroVisible || document.hidden) return setTimeout(slam, 800);
+  const D = 1500;
+  slipper.animate([
+    { transform: "translate(0,0) rotate(0deg)" },
+    { transform: "translate(-6%,-16%) rotate(-24deg)", offset: .5, easing: "cubic-bezier(.6,0,1,.4)" },
+    { transform: "translate(10%,8%) rotate(13deg)", offset: .66, easing: "ease-out" },
+    { transform: "translate(8%,6%) rotate(9deg)", offset: .8 },
+    { transform: "translate(0,0) rotate(0deg)" },
+  ], { duration: D, easing: "ease-in-out" });
+  setTimeout(impact, D * .66);
+  setTimeout(() => { blockedB.classList.remove("on"); renderTags(pickTags()); }, D + 1400);
+  setTimeout(slam, D + 2600);
+}
+renderTags(pickTags());
+if (reduced) { $$(".tag", tagsEl).forEach((t) => { t.textContent = "*".repeat(t.textContent.length); t.classList.add("hit"); }); blockedB.classList.add("on"); }
+else setTimeout(slam, 900);
+
+/* ── playground ──────────────────────────────── */
+const PRESETS = {
+  tr: {
+    text: "s2mle yüzle$ g0t_v3r3n o r o s p u pezev3nk i8ne pu$ttt or*spu",
+    dirty: ["$1kt1r git", "s.i.k.t.i.r", "SİKTİR", "siiiiiktir", "o r o s p u", "i8ne", "6öt", "siktiğimin", "$1kt1rler", "@pt@l"],
+    safe: ["Amsterdam'a gittik", "sikke koleksiyonu", "ambulans geldi", "siklet farkı", "memur bey", "malzeme listesi", "ama neden?"],
+  },
+  en: {
+    text: "what the phuck is this sh1t, you absolute 8itch",
+    dirty: ["f.u.c.k", "fuuuuck", "phucking", "s#it", "motherfucker", "a$$hole", "b1tch"],
+    safe: ["class assassin", "grass is green", "classic cocktail"],
+  },
+  es: {
+    text: "eres un p.u.t.o idiota, hijo de puta",
+    dirty: ["hijo de puta", "p.u.t.a", "mi3rda", "gilipollas", "cabr0n"],
+    safe: ["computadora", "disputa legal"],
+  },
+  de: {
+    text: "was für eine sch3iße du arschloch",
+    dirty: ["scheiße", "sch3isse", "a.r.s.c.h.l.o.c.h", "hurensohn", "fotze"],
+    safe: ["Schifffahrt", "Hausschuh"],
+  },
+};
+const state = { lang: "tr", mode: "balanced", maskStyle: "stars" };
+const input = $("#input"), output = $("#output"), matchesEl = $("#matches"), verdict = $("#verdict");
+let lastReq = 0, lastBlocked = false;
+
+function renderChips() {
+  const p = PRESETS[state.lang];
+  const mk = (arr, cls) => arr.map((t) => `<button class="chip ${cls}">${esc(t)}</button>`).join("");
+  $("#dirtyChips").innerHTML = mk(p.dirty, "");
+  $("#safeChips").innerHTML = mk(p.safe, "safe");
+}
+$(".presets").addEventListener("click", (e) => {
+  const c = e.target.closest(".chip"); if (!c) return;
+  input.value = c.textContent; run();
+});
+$$(".seg").forEach((seg) => seg.addEventListener("click", (e) => {
+  const b = e.target.closest("button"); if (!b) return;
+  $$("button", seg).forEach((x) => x.classList.toggle("on", x === b));
+  const key = seg.dataset.key; const prev = state[key];
+  state[key] = b.dataset.v;
+  if (key === "lang" && prev !== state.lang) { renderChips(); input.value = PRESETS[state.lang].text; }
+  run();
+}));
+
+function highlight(text, cleaned, matches) {
+  if (!matches.length) return esc(cleaned);
+  // clean() keeps length for stars/partial; for replace we substitute the mask ourselves
+  const sorted = [...matches].sort((a, b) => a.index - b.index);
+  let html = "", pos = 0;
+  for (const m of sorted) {
+    if (m.index < pos) continue;
+    const end = m.index + m.word.length;
+    html += esc(text.slice(pos, m.index));
+    const masked = state.maskStyle === "replace" ? "[***]" : cleaned.slice(m.index, end);
+    html += `<span class="m" data-tip="${esc(`${m.word} → ${m.root} · ${m.severity}${m.category ? " · " + m.category : ""} · ${m.method}`)}">${esc(masked)}</span>`;
+    pos = end;
+  }
+  return html + esc(text.slice(pos));
+}
+
+let timer;
+input.addEventListener("input", () => { clearTimeout(timer); timer = setTimeout(run, 90); });
+
+async function run() {
+  const text = input.value;
+  $("#charCount").textContent = `${text.length} chars`;
+  const id = ++lastReq;
+  const needsWarm = !warmed.has(state.lang);
+  if (needsWarm) {
+    $("#statusLine").innerHTML = `<span class="pulse"></span>compiling ${state.lang.toUpperCase()} patterns in a worker (one-time, first call only)…`;
+    verdict.className = "badge wait"; verdict.textContent = "WARMING UP";
+    const t0 = performance.now();
+    await warm(state.lang);
+    $("#statusLine").textContent = `✓ ${state.lang.toUpperCase()} patterns compiled in ${(performance.now() - t0).toFixed(0)}ms — every call after this is sub-millisecond.`;
+  }
+  const r = await call({ type: "detect", text, lang: state.lang, mode: state.mode, maskStyle: state.maskStyle });
+  if (id !== lastReq) return;
+  if (r.error) { output.textContent = r.error; return; }
+  output.classList.toggle("empty", !text);
+  output.innerHTML = text ? highlight(text, r.cleaned, r.matches) : "type something…";
+  $("#stMatches").textContent = r.matches.length;
+  $("#stTime").textContent = r.ms < 1 ? `${(r.ms * 1000).toFixed(0)} µs` : `${r.ms.toFixed(2)} ms`;
+  $("#normalized").textContent = r.normalized || "–";
+  const blocked = r.matches.length > 0;
+  verdict.className = `badge ${blocked ? "blocked-b" : "clean"}`;
+  verdict.textContent = blocked ? "BLOCKED" : "CLEAN";
+  if (blocked && !lastBlocked || blocked) {
+    const ms = $("#miniSlipper"); ms.classList.remove("slap"); void ms.offsetWidth; if (blocked) ms.classList.add("slap");
+  }
+  if (!blocked) $("#miniSlipper").classList.remove("slap");
+  lastBlocked = blocked;
+  matchesEl.innerHTML = blocked ? `<table><thead><tr><th>word</th><th>root</th><th>severity</th><th>category</th><th>method</th></tr></thead><tbody>${
+    r.matches.map((m, i) => `<tr style="animation-delay:${i * 40}ms"><td class="accent">${esc(m.word)}</td><td>${esc(m.root)}</td><td><span class="sev ${m.severity}">${m.severity}</span></td><td>${m.category || "–"}</td><td>${m.method}</td></tr>`).join("")
+  }</tbody></table>` : "";
+}
+
+renderChips();
+input.value = PRESETS.tr.text;
+run();
+
+/* ── live normalize ──────────────────────────── */
+const normIn = $("#normIn"), normOut = $("#normOut");
+let nTimer;
+async function runNorm() {
+  const r = await call({ type: "detect", text: normIn.value, lang: "tr" });
+  normOut.textContent = r.normalized || "–";
+}
+normIn.addEventListener("input", () => { clearTimeout(nTimer); nTimer = setTimeout(runNorm, 80); });
+warm("tr").then(runNorm);
+
+/* pipeline: a travelling highlight */
+const stagesEls = $$("#pipe .stage-card");
+let si = 0, pipeVisible = false;
+new IntersectionObserver(([e]) => (pipeVisible = e.isIntersecting)).observe($("#pipe"));
+setInterval(() => {
+  if (!pipeVisible || reduced) return;
+  stagesEls.forEach((el, i) => el.classList.toggle("active", i === si));
+  si = (si + 1) % (stagesEls.length + 2);
+}, 650);
+
+/* ── chat feed ───────────────────────────────── */
+const USERS = [["deniz", "#ff8a3d"], ["mert", "#e6c07b"], ["alex", "#8fd6c9"], ["ayşe", "#f59bb0"], ["sam", "#b3a2ff"], ["kaan", "#8fd694"]];
+const MSGS = [
+  ["tr", "selam millet, maç başlıyor mu?"], ["tr", "hakem tam bir $1kt1r ya"], ["en", "gg everyone, that was close"],
+  ["tr", "o r o s p u çocuğu kaçırdı golü"], ["tr", "Amsterdam'dan izliyorum bu arada"], ["en", "what the phuck was that pass"],
+  ["tr", "ambulans çağırın kaleciye 😂"], ["tr", "siiiiiktir git ofsayt değil o"], ["en", "classic assist, respect"],
+  ["tr", "i8ne herif yine yattı"], ["en", "you absolute 8itch, stop spamming"], ["tr", "sikke koleksiyonum var, satıyorum"],
+  ["tr", "g0t_v3r3n hakemler yüzünden"], ["en", "this game is fire"], ["tr", "aptal mısın sen 😤"],
+];
+const feed = $("#feed"); let mi = 0, filtered = 0, feedVisible = false;
+new IntersectionObserver(([e]) => (feedVisible = e.isIntersecting)).observe(feed);
+async function pushMsg() {
+  if (!feedVisible || document.hidden) return;
+  const [lang, text] = MSGS[mi++ % MSGS.length];
+  const [name, color] = USERS[(Math.random() * USERS.length) | 0];
+  await warm(lang);
+  const r = await call({ type: "detect", text, lang });
+  const el = document.createElement("div");
+  el.className = "msg";
+  el.innerHTML = `<div class="avatar" style="background:${color}">${name[0].toUpperCase()}</div><div class="bubble"><span class="who">${name} · ${lang}</span><span class="txt">${esc(text)}</span></div>`;
+  feed.appendChild(el);
+  while (feed.children.length > 9) feed.firstElementChild.remove();
+  if (r.matches.length) {
+    setTimeout(() => {
+      const b = $(".bubble", el); b.classList.add("flag");
+      $(".txt", el).innerHTML = highlightFeed(text, r.cleaned, r.matches);
+      b.insertAdjacentHTML("beforeend", `<span class="flag-note">⚑ ${r.matches.length} filtered · ${r.matches.map((m) => m.root).join(", ")}</span>`);
+      $("#feedCount").textContent = ++filtered;
+    }, 550);
+  }
+}
+function highlightFeed(text, cleaned, matches) {
+  let html = "", pos = 0;
+  for (const m of [...matches].sort((a, b) => a.index - b.index)) {
+    if (m.index < pos) continue;
+    html += esc(text.slice(pos, m.index)) + `<span class="m">${esc(cleaned.slice(m.index, m.index + m.word.length))}</span>`;
+    pos = m.index + m.word.length;
+  }
+  return html + esc(text.slice(pos));
+}
+setInterval(pushMsg, 1700);
+
+/* ── bars + counters ─────────────────────────── */
+const once = (el, fn) => new IntersectionObserver(([e], o) => { if (e.isIntersecting) { fn(); o.disconnect(); } }, { threshold: .3 }).observe(el);
+once($("#bars"), () => $$("#bars .bar").forEach((b, i) => setTimeout(() => (b.style.width = b.dataset.w + "%"), i * 120)));
+$$("[data-count]").forEach((el) => once(el, () => {
+  const to = parseFloat(el.dataset.count), dec = +el.dataset.dec || 0, t0 = performance.now(), D = reduced ? 1 : 1600;
+  const tick = (now) => {
+    const k = Math.min((now - t0) / D, 1), v = to * (1 - Math.pow(1 - k, 3));
+    el.textContent = dec ? v.toFixed(dec) : Math.round(v).toLocaleString("en-US");
+    if (k < 1) requestAnimationFrame(tick);
+  };
+  requestAnimationFrame(tick);
+}));
+</script>
+</body>
+</html>

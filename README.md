@@ -1,6 +1,6 @@
 # terlik.js
 
-![terlik.js](assets/social-preview.png)
+[![terlik.js](assets/terlik-cover.png)](https://badursun.github.io/terlik.js/)
 
 [![CI](https://github.com/badursun/terlik.js/actions/workflows/ci.yml/badge.svg)](https://github.com/badursun/terlik.js/actions/workflows/ci.yml)
 [![npm version](https://img.shields.io/npm/v/terlik.js.svg)](https://www.npmjs.com/package/terlik.js)
@@ -9,6 +9,8 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-Ready-blue.svg)](https://www.typescriptlang.org/)
 [![zero dependencies](https://img.shields.io/badge/dependencies-0-brightgreen.svg)]()
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
+**[🧪 Live demo & docs → badursun.github.io/terlik.js](https://badursun.github.io/terlik.js/)** — try it in your browser, no install needed.
 
 Multi-language profanity detection and filtering engine, designed Turkish-first and **extensible to any language**. Not a naive blacklist — a multi-layered normalization and pattern engine that catches what simple string matching misses.
 
@@ -534,6 +536,10 @@ pnpm test:spdg     # run SPDG tests only (datasets must exist)
 ```
 
 SPDG tests are automatically skipped when dataset files are absent — zero impact on the regular test suite. See [SPDG Automated Test docs](./docs/spdg-automated-test.md) for thresholds, pipeline details, and reference results.
+
+### Live Demo (GitHub Pages)
+
+The project site at **[badursun.github.io/terlik.js](https://badursun.github.io/terlik.js/)** runs the real library in the browser (inside a Web Worker) — playground with all 4 languages, modes and mask styles, a simulated moderated chat, and the normalization pipeline. Source lives in [`docs/`](./docs/index.html); rebuild the browser bundle with `pnpm site:build`.
 
 ### Live Test Server
 
