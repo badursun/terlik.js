@@ -584,7 +584,7 @@ The terlik detection engine has been ported to other languages by the community:
 |---|---|---|
 | **Go** | [KilimcininKorOglu/terlik.go](https://github.com/KilimcininKorOglu/terlik.go) | Active |
 | **PHP** | [KilimcininKorOglu/terlik.php](https://github.com/KilimcininKorOglu/terlik.php) | Active |
-| **Python** | *Coming soon* | Planned |
+| **Python** | [alpsakaci/terlik.py](https://github.com/alpsakaci/terlik.py) | Active |
 
 > **Want to port terlik to another language?** The core algorithm (normalization pipeline + suffix engine + pattern matching) is language-agnostic. See [How It Works](#how-it-works) for the detection architecture.
 
