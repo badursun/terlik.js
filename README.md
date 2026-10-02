@@ -518,7 +518,7 @@ Low-level class that accepts a pre-resolved `LanguageConfig` instead of a langua
 
 ## Testing
 
-1341 tests covering all built-in languages, 147 Turkish root words, 138 English roots, suffix detection, lazy compilation, multi-language isolation, normalization, fuzzy matching, cleaning, integration, ReDoS hardening, attack surface coverage, external dictionary merging, per-language entry points, and edge cases:
+1345 tests covering all built-in languages, 147 Turkish root words, 138 English roots, suffix detection, lazy compilation, multi-language isolation, normalization, fuzzy matching, cleaning, integration, ReDoS hardening, attack surface coverage, external dictionary merging, per-language entry points, and edge cases:
 
 ```bash
 pnpm test          # run once

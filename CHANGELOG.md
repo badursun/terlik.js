@@ -2,9 +2,20 @@
 
 All notable changes to terlik.js are documented here.
 
-## v2.6.0 (2026-03-02) — TR + EN Dictionary Expansion & Benchmark Enrichment
+## v2.6.0 (2026-10-02) — TR + EN Dictionary Expansion, Whitespace Index Fix & Per-Language Bundles
 
-**Massive TR dictionary expansion (39 → 147 entries), EN dictionary expansion (56 → 138 entries), EN suffix engine strengthened (9 → 28 suffixes), and SPDG-driven benchmark enrichment (290 → 1280 samples).**
+**Massive TR dictionary expansion (39 → 147 entries), EN dictionary expansion (56 → 138 entries), EN suffix engine strengthened (9 → 28 suffixes), SPDG-driven benchmark enrichment (290 → 1280 samples), and a fix for wrong match positions with irregular whitespace.**
+
+### Fixes
+- **Strict / fuzzy match indexes with irregular whitespace** ([#2](https://github.com/badursun/terlik.js/pull/2), thanks [@ismntr](https://github.com/ismntr)) — Strict and fuzzy detection advanced the index by `word length + 1`, so double spaces, tabs, newlines or leading whitespace shifted every following match. `clean()` could then mask an innocent word and leave the profane one visible (`" \tmerhaba \n  siktir  "` → `" *******a \n  siktir  "`). Tokens now carry their real offsets and are normalized individually. The default `balanced` mode was not affected. Strict-mode throughput is ~20–40% lower as a result, still ~400K msgs/sec on short messages.
+
+### Packaging
+- **Per-language entry points now on npm** — `terlik.js/tr`, `/en`, `/es`, `/de` (plus `TerlikCore` and `createTerlik()`) were documented under v2.5.0 but missed that npm publish; this is the first release that actually ships them.
+- **Node.js >= 20** — Node 18 reached end-of-life; CI now tests Node 20 and 22 and `engines` requires `>=20`.
+- **Express middleware example** added under `examples/`.
+
+### Turkish Suffix Engine
+- **Unicode suffix letters** — Suffix patterns now accept Turkish letters (`ı`, `ü`, `ö`, …), plus additional possessive/case forms; more roots marked `suffixable`.
 
 ### Turkish Dictionary
 - **Turkish dictionary overhaul** — 108 new entries across 8 categories: character insults (`alçak`, `terbiyesiz`, `küstah`), general insults (`budala`, `ahmak`, `embesil`), slang (`çomar`, `maganda`, `yobaz`), fraud/deception (`dolandırıcı`, `sahtekar`, `şarlatan`), threats (`geber`, `öldürücem`, `defol`), sexual (`kerhane`, `kaşar`, `sakso`), abbreviations (`sg`, `oç`, `sktrgt`), animal insults (`domuz`, `öküz`, `eşek`).
@@ -29,7 +40,7 @@ All notable changes to terlik.js are documented here.
 ### SPDG & Benchmark
 - **EN SPDG data enrichment** — Suffix list (9 → 28, aligned with engine), leet map (9 → 16 mappings), templates (15 → 87 positive, 15 → 63 negative), contexts (15 → 40 each), emoji replacements (15 → 25).
 - **Benchmark dataset enrichment** — Dynamic SPDG import in `dataset.ts`: curated 290 samples + SPDG-generated 990 samples = **1280 total samples** with category mapping.
-- **1341 tests** passing, zero regression.
+- **1345 tests** passing, zero regression.
 
 ## v2.5.0 (2026-03-02) — Security Normalization + Per-Language Bundles
 
