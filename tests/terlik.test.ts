@@ -39,6 +39,12 @@ describe("Terlik (integration)", () => {
     it("returns empty array for clean text", () => {
       expect(terlik.getMatches("merhaba")).toEqual([]);
     });
+
+    it("returns correct index with irregular whitespace", () => {
+      const matches = terlik.getMatches(" \tmerhaba \n  siktir  ", { mode: "strict" });
+      const match = matches.find((m) => m.word === "siktir");
+      expect(match?.index).toBe(13);
+    });
   });
 
   describe("clean", () => {
@@ -64,6 +70,11 @@ describe("Terlik (integration)", () => {
 
     it("returns clean text unchanged", () => {
       expect(terlik.clean("merhaba dunya")).toBe("merhaba dunya");
+    });
+
+    it("masks profanity at the correct position with irregular whitespace", () => {
+      const result = terlik.clean(" \tmerhaba \n  siktir  ", { mode: "strict" });
+      expect(result).toBe(" \tmerhaba \n  ******  ");
     });
   });
 

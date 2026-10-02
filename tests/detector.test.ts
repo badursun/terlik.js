@@ -73,6 +73,21 @@ describe("detector", () => {
       // In strict mode, each word is checked individually, "s" "i" "k" etc. won't match
       expect(results.length).toBe(0);
     });
+
+    it("keeps correct match indexes with irregular whitespace", () => {
+      const strictCases = [
+        { text: "merhaba  siktir", expectedIndex: 9 },
+        { text: "merhaba\tsiktir", expectedIndex: 8 },
+        { text: "merhaba\nsiktir", expectedIndex: 8 },
+        { text: " \tmerhaba \n  siktir  ", expectedIndex: 13 },
+      ];
+
+      for (const c of strictCases) {
+        const results = detector.detect(c.text, { mode: "strict" });
+        const match = results.find((r) => r.word === "siktir");
+        expect(match?.index).toBe(c.expectedIndex);
+      }
+    });
   });
 
   describe("loose mode (with fuzzy)", () => {
@@ -83,6 +98,26 @@ describe("detector", () => {
         fuzzyThreshold: 0.7,
       });
       expect(results.length).toBeGreaterThan(0);
+    });
+
+    it("keeps correct fuzzy indexes with irregular whitespace", () => {
+      const fuzzyCases = [
+        { text: "merhaba  siktr", expectedIndex: 9 },
+        { text: "merhaba\tsiktr", expectedIndex: 8 },
+        { text: "merhaba\nsiktr", expectedIndex: 8 },
+        { text: " \tmerhaba \n  siktr  ", expectedIndex: 13 },
+      ];
+
+      for (const c of fuzzyCases) {
+        const results = detector.detect(c.text, {
+          mode: "loose",
+          enableFuzzy: true,
+          fuzzyThreshold: 0.7,
+        });
+        const match = results.find((r) => r.word === "siktr");
+        expect(match?.method).toBe("fuzzy");
+        expect(match?.index).toBe(c.expectedIndex);
+      }
     });
   });
 
